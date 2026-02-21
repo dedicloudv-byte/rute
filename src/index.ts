@@ -108,6 +108,94 @@ app.delete('/delete/:id', async (c) => {
   return c.json({ ok: true });
 });
 
+// Direct AI Gateway (Simplified GET request)
+app.get('/ai/:provider', async (c) => {
+  const provider = c.req.param('provider').toLowerCase();
+  const prompt = c.req.query('prompt');
+  const apikey = c.req.query('apikey');
+  const model = c.req.query('model');
+
+  if (!prompt || !apikey) {
+    return c.json({ ok: false, error: 'Parameter prompt dan apikey wajib diisi' }, 400);
+  }
+
+  let url = '';
+  let method = 'POST';
+  let headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  let body: any = null;
+
+  try {
+    if (provider === 'gemini' || provider === 'gimini') {
+      const targetModel = model || 'gemini-1.5-flash';
+      url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apikey}`;
+      body = { contents: [{ parts: [{ text: prompt }] }] };
+    } else if (provider === 'openai') {
+      url = 'https://api.openai.com/v1/chat/completions';
+      headers['Authorization'] = `Bearer ${apikey}`;
+      body = {
+        model: model || 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }]
+      };
+    } else if (provider === 'claude' || provider === 'anthropic') {
+      url = 'https://api.anthropic.com/v1/messages';
+      headers['x-api-key'] = apikey;
+      headers['anthropic-version'] = '2023-06-01';
+      body = {
+        model: model || 'claude-3-haiku-20240307',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }]
+      };
+    } else if (['groq', 'mistral', 'perplexity'].includes(provider)) {
+      const baseUrlMap: Record<string, string> = {
+        groq: 'https://api.groq.com/openai/v1',
+        mistral: 'https://api.mistral.ai/v1',
+        perplexity: 'https://api.perplexity.ai'
+      };
+      const modelMap: Record<string, string> = {
+        groq: 'llama3-8b-8192',
+        mistral: 'mistral-tiny',
+        perplexity: 'llama-3-sonar-small-32k-online'
+      };
+      url = `${baseUrlMap[provider]}/chat/completions`;
+      headers['Authorization'] = `Bearer ${apikey}`;
+      body = {
+        model: model || modelMap[provider],
+        messages: [{ role: 'user', content: prompt }]
+      };
+    } else {
+      return c.json({ ok: false, error: 'Provider tidak didukung' }, 400);
+    }
+
+    const response = await fetch(url, {
+      method,
+      headers,
+      body: JSON.stringify(body)
+    });
+
+    const data: any = await response.json();
+
+    // Normalisasi respons untuk klien
+    let resultText = '';
+    if (provider === 'gemini' || provider === 'gimini') {
+      resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gemini';
+    } else if (['openai', 'groq', 'mistral', 'perplexity'].includes(provider)) {
+      resultText = data.choices?.[0]?.message?.content || 'No response';
+    } else if (provider === 'claude' || provider === 'anthropic') {
+      resultText = data.content?.[0]?.text || 'No response from Claude';
+    }
+
+    return c.json({
+      ok: response.ok,
+      provider,
+      model: body?.model || model || 'default',
+      result: resultText,
+      raw: data
+    });
+  } catch (err: any) {
+    return c.json({ ok: false, error: 'Gateway Error: ' + err.message }, 500);
+  }
+});
+
 // Route utama untuk proxy dengan dukungan ID dari R2
 app.all('/p/:mode/:id/:path{.+}?', async (c) => {
   const { mode, id, path } = c.req.param();

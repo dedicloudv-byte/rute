@@ -253,8 +253,26 @@ export const getFrontend = (workerUrl: string) => `
                 <span>Generate Proxy API</span>
             </button>
 
+            <div id="gatewayBox" class="main-panel" style="margin-top: 2rem; border-style: dashed; border-color: var(--primary);">
+                <h2 style="color: var(--primary); margin-bottom: 1rem;">Direct AI Gateway (No ID Needed)</h2>
+                <div class="form-group">
+                    <label>Quick Prompt Test</label>
+                    <input type="text" id="gatewayPrompt" placeholder="What is the meaning of life?" value="Halo, siapa kamu?">
+                </div>
+                <div id="gatewayUrlDisplay" class="url-text" style="margin-bottom: 1rem; display: none; word-break: break-all;"></div>
+                <button id="gatewayBtn" class="btn btn-primary" style="background: var(--primary);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 2l-18 10 18 10-2-10 2-10zM2 12l21 0"/></svg>
+                    <span>Execute Direct Request</span>
+                </button>
+
+                <div id="gatewayResult" class="preview-container" style="margin-top: 1.5rem;">
+                    <div style="color: var(--text-dim); font-size: 0.7rem; font-weight: 700; margin-bottom: 0.75rem; text-transform: uppercase;">Gateway Response:</div>
+                    <pre id="gatewayContent" style="color: var(--success); font-family: 'JetBrains Mono', monospace; white-space: pre-wrap;"></pre>
+                </div>
+            </div>
+
             <div id="resultBox" class="result-box">
-                <h2>Generated Endpoints</h2>
+                <h2>Generated Vault Endpoints</h2>
                 <div id="endpointsContainer"></div>
 
                 <div id="previewContainer" class="preview-container">
@@ -298,18 +316,70 @@ export const getFrontend = (workerUrl: string) => `
         const previewContent = document.getElementById('previewContent');
         const usageInstructions = document.getElementById('usageInstructions');
         const instructionText = document.getElementById('instructionText');
+        const gatewayPrompt = document.getElementById('gatewayPrompt');
+        const gatewayBtn = document.getElementById('gatewayBtn');
+        const gatewayResult = document.getElementById('gatewayResult');
+        const gatewayContent = document.getElementById('gatewayContent');
+        const gatewayUrlDisplay = document.getElementById('gatewayUrlDisplay');
 
         let activeId = null;
         let selectedProvider = null;
 
         function selectTemplate(id) {
             document.querySelectorAll('.template-chip').forEach(el => el.classList.remove('active'));
-            const chip = Array.from(document.querySelectorAll('.template-chip')).find(el => el.innerText.toLowerCase() === id);
+            const chip = Array.from(document.querySelectorAll('.template-chip')).find(el => el.innerText.toLowerCase().includes(id));
             if (chip) chip.classList.add('active');
 
             targetUrlInput.value = AI_TEMPLATES[id].url;
             selectedProvider = id;
+            updateGatewayUrl();
         }
+
+        function updateGatewayUrl() {
+            if (!selectedProvider) return;
+            const baseUrl = window.location.origin + '/ai/' + selectedProvider;
+            const apikey = apiKeyInput.value.trim() || 'YOUR_API_KEY';
+            const prompt = encodeURIComponent(gatewayPrompt.value.trim());
+            const fullUrl = \`\${baseUrl}?prompt=\${prompt}&apikey=\${apikey}\`;
+            gatewayUrlDisplay.innerText = fullUrl;
+            gatewayUrlDisplay.style.display = 'block';
+        }
+
+        gatewayPrompt.oninput = updateGatewayUrl;
+        apiKeyInput.oninput = updateGatewayUrl;
+
+        gatewayBtn.onclick = async () => {
+            if (!selectedProvider) {
+                alert('Silakan pilih template AI terlebih dahulu');
+                return;
+            }
+            const apikey = apiKeyInput.value.trim();
+            const prompt = gatewayPrompt.value.trim();
+            if (!apikey) {
+                alert('API Key diperlukan untuk Direct Gateway');
+                return;
+            }
+
+            gatewayBtn.disabled = true;
+            gatewayResult.style.display = 'block';
+            gatewayContent.innerText = 'Routing via Global AI Gateway...';
+
+            try {
+                const url = \`/ai/\${selectedProvider}?prompt=\${encodeURIComponent(prompt)}&apikey=\${apikey}\`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.ok) {
+                    gatewayContent.innerText = data.result;
+                } else {
+                    gatewayContent.innerText = 'Error: ' + (data.error || JSON.stringify(data.raw, null, 2));
+                }
+            } catch (err) {
+                gatewayContent.innerText = 'Connection Error: ' + err.message;
+            } finally {
+                gatewayBtn.disabled = false;
+            }
+        };
 
         async function loadStored() {
             try {
