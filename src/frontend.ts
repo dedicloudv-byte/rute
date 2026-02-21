@@ -474,18 +474,20 @@ export const getFrontend = (workerUrl: string) => `
 
                 <div class="input-group">
                     <label class="input-label">Global API Key (Auto-injected)</label>
-                    <input type="password" id="globalApiKey" placeholder="sk-...">
+                    <input type="password" id="globalApiKey" placeholder="Masukkan API Key Anda di sini (sk-... atau key-...)">
+                    <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 0.4rem;">Key ini akan disuntikkan secara otomatis ke setiap permintaan melalui proxy.</div>
                 </div>
 
                 <div class="input-group">
                     <label class="input-label">Target Endpoint URL</label>
                     <input type="text" id="targetUrl" placeholder="https://api.openai.com/v1" value="https://example.com">
+                    <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 0.4rem;">Domain asli yang ingin Anda samarkan (misal: API OpenAI atau Gemini).</div>
                 </div>
 
                 <div class="input-group">
                     <label class="input-label">Security Protocol</label>
                     <select id="proxyMode">
-                        <option value="elite">Elite Stealth (Stripped Headers)</option>
+                        <option value="elite">Elite Stealth (Stripped Headers - Paling Aman)</option>
                         <option value="anonymous">Anonymous (Hidden Client IP)</option>
                         <option value="transparent">Transparent (Full Passthrough)</option>
                     </select>
@@ -493,7 +495,7 @@ export const getFrontend = (workerUrl: string) => `
 
                 <button id="saveBtn" class="main-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
-                    <span>Initialize Private Vault</span>
+                    <span>Deploy Persistent Secure Proxy</span>
                 </button>
             </div>
 
@@ -516,8 +518,8 @@ export const getFrontend = (workerUrl: string) => `
                 </h2>
                 <div class="provider-grid">
                     <div class="provider-item" onclick="selectProvider('gemini')">
-                        <span>✨ Gemini Pro</span>
-                        <span class="badge">v1.5</span>
+                        <span>✨ Gemini 2.0 Flash</span>
+                        <span class="badge">LATEST</span>
                     </div>
                     <div class="provider-item" onclick="selectProvider('openai')">
                         <span>🤖 GPT-4o</span>
@@ -548,7 +550,7 @@ export const getFrontend = (workerUrl: string) => `
 
     <script>
         const PROVIDERS = {
-            gemini: { name: 'Gemini Pro', url: 'https://generativelanguage.googleapis.com' },
+            gemini: { name: 'Gemini 2.0 Flash', url: 'https://generativelanguage.googleapis.com' },
             openai: { name: 'GPT-4o / OpenAI', url: 'https://api.openai.com/v1' },
             claude: { name: 'Claude 3.5 Sonnet', url: 'https://api.anthropic.com/v1' },
             groq: { name: 'Groq Cloud', url: 'https://api.groq.com/openai/v1' }
@@ -556,6 +558,12 @@ export const getFrontend = (workerUrl: string) => `
 
         let selectedId = null;
         let currentProvider = null;
+
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
 
         // UI Interactions
         function selectProvider(id) {
@@ -619,15 +627,24 @@ export const getFrontend = (workerUrl: string) => `
                     const card = document.createElement('div');
                     card.className = 'vault-card' + (selectedId === item.id ? ' active' : '');
                     card.onclick = () => showVaultDetail(item);
+
+                    const safeUrl = escapeHTML(item.url);
+                    const safeId = escapeHTML(item.id);
+                    const safeProvider = escapeHTML(item.provider);
+
                     card.innerHTML = \`
                         <div class="vault-info">
-                            <h4>\${item.url}</h4>
-                            <div class="vault-meta">ID: \${item.id.substring(0,8)}... • \${item.provider}</div>
+                            <h4>\${safeUrl}</h4>
+                            <div class="vault-meta">ID: \${safeId.substring(0,8)}... • \${safeProvider}</div>
                         </div>
-                        <div class="delete-btn" onclick="event.stopPropagation(); deleteVault('\${item.id}')">
+                        <div class="delete-btn">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                         </div>
                     \`;
+                    card.querySelector('.delete-btn').onclick = (e) => {
+                        e.stopPropagation();
+                        deleteVault(item.id);
+                    };
                     list.appendChild(card);
                 });
             } catch (err) {
@@ -659,25 +676,33 @@ export const getFrontend = (workerUrl: string) => `
 
             modes.forEach(m => {
                 const url = window.location.origin + '/p/' + m.id + '/' + item.id;
+                const safeUrl = escapeHTML(url);
+                const safeLabel = escapeHTML(m.label);
+
                 const card = document.createElement('div');
                 card.className = 'access-card';
                 card.innerHTML = \`
-                    <div style="font-size: 0.875rem; font-weight: 700;">\${m.label}</div>
+                    <div style="font-size: 0.875rem; font-weight: 700;">\${safeLabel}</div>
                     <div class="url-box">
-                        <div class="url-text">\${url}</div>
-                        <button class="copy-btn" onclick="copyText('\${url}', this)">Copy</button>
+                        <div class="url-text">\${safeUrl}</div>
+                        <button class="copy-btn">Copy</button>
                     </div>
                 \`;
+                card.querySelector('.copy-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    copyText(url, e.target);
+                };
                 container.appendChild(card);
             });
 
             const guide = document.getElementById('integrationGuide');
+            const safeEndpoint = window.location.origin + '/p/elite/' + item.id;
             if (item.provider === 'gemini') {
-                guide.innerText = 'Configured for Google GenAI SDK. Set client_options={"api_endpoint": "'+window.location.origin+'/p/elite/'+item.id+'"}.';
+                guide.textContent = 'Configured for Google GenAI SDK. Set client_options={"api_endpoint": "' + safeEndpoint + '"}.';
             } else if (item.provider === 'openai') {
-                guide.innerText = 'OpenAI SDK ready. Use base_url="'+window.location.origin+'/p/elite/'+item.id+'".';
+                guide.textContent = 'OpenAI SDK ready. Use base_url="' + safeEndpoint + '".';
             } else {
-                guide.innerText = 'Use these endpoints in any HTTP client. Headers and keys are automatically injected.';
+                guide.textContent = 'Use these endpoints in any HTTP client. Headers and keys are automatically injected.';
             }
         }
 
@@ -713,7 +738,7 @@ export const getFrontend = (workerUrl: string) => `
                 alert('Connection Error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><span>Initialize Private Vault</span>';
+                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><span>Deploy Persistent Secure Proxy</span>';
             }
         };
 
@@ -744,4 +769,4 @@ export const getFrontend = (workerUrl: string) => `
     </script>
 </body>
 </html>
-`;
+\`;
