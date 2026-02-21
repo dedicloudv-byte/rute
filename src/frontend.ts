@@ -218,11 +218,11 @@ export const getFrontend = (workerUrl: string) => `
             <h1>Smart Proxy Elite</h1>
 
             <div class="form-group">
-                <label>AI Templates (Quick Select)</label>
+                <label>AI Templates (Quick Select - Optimized for latest SDKs)</label>
                 <div id="aiTemplates" class="template-grid">
                     <div class="template-chip" onclick="selectTemplate('openai')">OpenAI</div>
                     <div class="template-chip" onclick="selectTemplate('claude')">Claude</div>
-                    <div class="template-chip" onclick="selectTemplate('gemini')">Gemini</div>
+                    <div class="template-chip" onclick="selectTemplate('gemini')">Gemini (New)</div>
                     <div class="template-chip" onclick="selectTemplate('groq')">Groq</div>
                     <div class="template-chip" onclick="selectTemplate('mistral')">Mistral</div>
                     <div class="template-chip" onclick="selectTemplate('perplexity')">Perplexity</div>
@@ -276,7 +276,7 @@ export const getFrontend = (workerUrl: string) => `
         const AI_TEMPLATES = {
             openai: { url: 'https://api.openai.com/v1', name: 'OpenAI' },
             claude: { url: 'https://api.anthropic.com/v1', name: 'Claude' },
-            gemini: { url: 'https://generativelanguage.googleapis.com/v1beta', name: 'Gemini' },
+            gemini: { url: 'https://generativelanguage.googleapis.com', name: 'Gemini (GenAI SDK)' },
             groq: { url: 'https://api.groq.com/openai/v1', name: 'Groq' },
             mistral: { url: 'https://api.mistral.ai/v1', name: 'Mistral' },
             perplexity: { url: 'https://api.perplexity.ai', name: 'Perplexity' }

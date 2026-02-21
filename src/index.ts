@@ -126,8 +126,6 @@ async function handleProxy(c: Context<{ Bindings: Env }>, mode: string, targetBa
     targetUrlObj.searchParams.set(key, value);
   });
 
-  const targetUrl = targetUrlObj.toString();
-
   // Persiapkan header berdasarkan mode
   const incomingHeaders = c.req.header();
   const newHeaders = new Headers();
@@ -163,9 +161,14 @@ async function handleProxy(c: Context<{ Bindings: Env }>, mode: string, targetBa
       newHeaders.set('anthropic-version', '2023-06-01');
     } else if (provider === 'gemini') {
       newHeaders.set('x-goog-api-key', key);
+      // Dukungan untuk SDK yang menggunakan query parameter ?key=
+      if (!targetUrlObj.searchParams.has('key')) {
+        targetUrlObj.searchParams.set('key', key);
+      }
     }
   }
 
+  const targetUrl = targetUrlObj.toString();
   const clientIP = c.req.header('CF-Connecting-IP') || '127.0.0.1';
 
   if (mode === 'transparent') {
