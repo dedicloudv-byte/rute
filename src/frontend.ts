@@ -261,6 +261,11 @@ export const getFrontend = (workerUrl: string) => `
                     <div style="color: var(--text-dim); font-size: 0.7rem; font-weight: 700; margin-bottom: 0.75rem; text-transform: uppercase;">Real-time API Response:</div>
                     <pre id="previewContent" style="color: var(--success); font-family: 'JetBrains Mono', monospace;"></pre>
                 </div>
+
+                <div id="usageInstructions" style="margin-top: 2rem; padding: 1.5rem; background: rgba(99, 102, 241, 0.05); border-radius: 18px; border: 1px dashed var(--primary); display: none;">
+                    <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 0.75rem;">SDK Integration Guide</h3>
+                    <div id="instructionText" style="font-size: 0.8rem; color: var(--text-dim); line-height: 1.5;"></div>
+                </div>
             </div>
         </div>
 
@@ -291,6 +296,8 @@ export const getFrontend = (workerUrl: string) => `
         const storedList = document.getElementById('storedList');
         const previewContainer = document.getElementById('previewContainer');
         const previewContent = document.getElementById('previewContent');
+        const usageInstructions = document.getElementById('usageInstructions');
+        const instructionText = document.getElementById('instructionText');
 
         let activeId = null;
         let selectedProvider = null;
@@ -349,14 +356,26 @@ export const getFrontend = (workerUrl: string) => `
 
         function showEndpoints(id, url) {
             activeId = id;
-            document.querySelectorAll('.stored-item').forEach(el => {
-                el.classList.remove('active');
-                if (el.querySelector('.stored-id').innerText === id) el.classList.add('active');
-            });
+            const item = Array.from(document.querySelectorAll('.stored-item')).find(el => el.querySelector('.stored-id').innerText === id);
+            const provider = item ? item.querySelector('.provider-badge').innerText.toLowerCase() : 'custom';
+
+            document.querySelectorAll('.stored-item').forEach(el => el.classList.remove('active'));
+            if (item) item.classList.add('active');
 
             resultBox.classList.add('show');
             endpointsContainer.innerHTML = '';
             previewContainer.classList.remove('show');
+            usageInstructions.style.display = 'block';
+
+            if (provider === 'gemini') {
+                instructionText.innerHTML = 'To use with <b>Google GenAI SDK (Python)</b>:<br>1. Use <code>client_options={"api_endpoint": "YOUR_PROXY_URL"}</code>.<br>2. Use any dummy string for <code>api_key</code>.<br>3. The proxy handles the real key and versioning.';
+            } else if (provider === 'openai') {
+                instructionText.innerHTML = 'To use with <b>OpenAI SDK</b>:<br>1. Set <code>base_url</code> to the Elite endpoint below.<br>2. Use any dummy string for <code>api_key</code> (proxy handles the real key).';
+            } else if (provider === 'claude' || provider === 'anthropic') {
+                instructionText.innerHTML = 'To use with <b>Anthropic SDK</b>:<br>1. Set <code>base_url</code> to the Elite endpoint below.<br>2. Use any dummy string for <code>api_key</code>.';
+            } else {
+                instructionText.innerHTML = 'Point your application to these endpoints. Authentication and headers are managed by the Smart Proxy Elite vault.';
+            }
 
             const modes = [
                 { id: 'transparent', label: 'Transparent Endpoint' },
@@ -388,8 +407,17 @@ export const getFrontend = (workerUrl: string) => `
         async function testProxy(url) {
             previewContainer.classList.add('show');
             previewContent.innerText = 'Initializing handshake...';
+
+            let testUrl = url;
+            // Gunakan path yang valid untuk testing provider tertentu
+            if (selectedProvider === 'gemini') {
+                testUrl = url.replace(/\\/$/, '') + '/v1beta/models';
+            } else if (['openai', 'mistral', 'groq', 'perplexity'].includes(selectedProvider)) {
+                testUrl = url.replace(/\\/$/, '') + '/models';
+            }
+
             try {
-                const res = await fetch(url);
+                const res = await fetch(testUrl);
                 const text = await res.text();
                 try {
                     previewContent.innerText = JSON.stringify(JSON.parse(text), null, 2);

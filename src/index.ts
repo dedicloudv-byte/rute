@@ -26,13 +26,34 @@ app.post('/check', async (c) => {
   if (!targetUrl) return c.json({ ok: false, error: 'URL tidak valid' }, 400);
 
   try {
-    const response = await fetch(targetUrl, {
+    // Tentukan URL untuk health check. Beberapa API AI tidak mendukung root GET.
+    let checkUrl = targetUrl;
+    const testHeaders: Record<string, string> = { 'User-Agent': 'Smart-Proxy-Elite-Checker/1.0' };
+
+    if (provider === 'gemini' && !targetUrl.includes('v1')) {
+      checkUrl = targetUrl.replace(/\/$/, '') + '/v1beta/models';
+      if (apiKey) checkUrl += `?key=${apiKey}`;
+    } else if (['openai', 'mistral', 'groq', 'perplexity'].includes(provider as string)) {
+      checkUrl = targetUrl.replace(/\/$/, '') + '/models';
+      if (apiKey) testHeaders['Authorization'] = `Bearer ${apiKey}`;
+    }
+
+    let response = await fetch(checkUrl, {
       method: 'GET',
       redirect: 'follow',
-      headers: { 'User-Agent': 'Smart-Proxy-Elite-Checker/1.0' }
+      headers: testHeaders
     });
 
-    // Kita anggap "OK" jika server merespons, meskipun statusnya bukan 200 (misal 401/404 pada root API)
+    // Jika health check khusus gagal, coba root sebagai fallback
+    if (!response.ok && checkUrl !== targetUrl) {
+      response = await fetch(targetUrl, {
+        method: 'GET',
+        redirect: 'follow',
+        headers: { 'User-Agent': 'Smart-Proxy-Elite-Checker/1.0' }
+      });
+    }
+
+    // Kita anggap "OK" jika server merespons, meskipun statusnya bukan 200 (misal 401 pada root API)
     const id = crypto.randomUUID();
     const config = { url: targetUrl, key: apiKey, provider: provider };
 
@@ -162,9 +183,8 @@ async function handleProxy(c: Context<{ Bindings: Env }>, mode: string, targetBa
     } else if (provider === 'gemini') {
       newHeaders.set('x-goog-api-key', key);
       // Dukungan untuk SDK yang menggunakan query parameter ?key=
-      if (!targetUrlObj.searchParams.has('key')) {
-        targetUrlObj.searchParams.set('key', key);
-      }
+      // Selalu timpa dengan key dari vault untuk keamanan
+      targetUrlObj.searchParams.set('key', key);
     }
   }
 
