@@ -28,7 +28,10 @@ app.get('/check', async (c) => {
 
     if (response.ok) {
       const id = crypto.randomUUID();
-      await c.env.VPSAI.put(id, targetUrl);
+      // Simpan URL di body dan juga di metadata untuk listing yang cepat
+      await c.env.VPSAI.put(id, targetUrl, {
+        customMetadata: { url: targetUrl }
+      });
       return c.json({ ok: true, status: response.status, id });
     } else {
       return c.json({
@@ -54,6 +57,24 @@ app.all('/r/:mode/:encodedUrl/:path{.+}?', async (c) => {
     return c.text('URL tidak valid', 400);
   }
   return handleProxy(c, mode, targetBaseUrl, path);
+});
+
+// Endpoint untuk list semua endpoint yang disimpan
+app.get('/list', async (c) => {
+  const list = await c.env.VPSAI.list({ include: ['customMetadata'] });
+  const items = list.objects.map(obj => ({
+    id: obj.key,
+    url: obj.customMetadata?.url || 'Unknown',
+    uploaded: obj.uploaded
+  }));
+  return c.json({ ok: true, items });
+});
+
+// Endpoint untuk menghapus endpoint
+app.delete('/delete/:id', async (c) => {
+  const id = c.req.param('id');
+  await c.env.VPSAI.delete(id);
+  return c.json({ ok: true });
 });
 
 // Route utama untuk proxy dengan dukungan ID dari R2
