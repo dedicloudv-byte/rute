@@ -126,7 +126,7 @@ app.get('/ai/:provider', async (c) => {
 
   try {
     if (provider === 'gemini' || provider === 'gimini') {
-      const targetModel = model || 'gemini-1.5-flash';
+      const targetModel = model || 'gemini-3-flash-preview';
       url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apikey}`;
       body = { contents: [{ parts: [{ text: prompt }] }] };
     } else if (provider === 'openai') {

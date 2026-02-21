@@ -438,7 +438,7 @@ export const getFrontend = (workerUrl: string) => `
             usageInstructions.style.display = 'block';
 
             if (provider === 'gemini') {
-                instructionText.innerHTML = 'To use with <b>Google GenAI SDK (Python)</b>:<br>1. Use <code>client_options={"api_endpoint": "YOUR_PROXY_URL"}</code>.<br>2. Use any dummy string for <code>api_key</code>.<br>3. The proxy handles the real key and versioning.';
+                instructionText.innerHTML = 'To use with <b>Latest Google GenAI SDK</b>:<br>1. Set <code>api_endpoint</code> in client options.<br>2. Specify model <code>gemini-3-flash-preview</code>.<br>3. The proxy securely injects your vault API key.';
             } else if (provider === 'openai') {
                 instructionText.innerHTML = 'To use with <b>OpenAI SDK</b>:<br>1. Set <code>base_url</code> to the Elite endpoint below.<br>2. Use any dummy string for <code>api_key</code> (proxy handles the real key).';
             } else if (provider === 'claude' || provider === 'anthropic') {

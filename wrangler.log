@@ -7,6 +7,3 @@ env.VPSAI (vpsai)      R2 Bucket      local
 
 ⎔ Starting local server...
 [wrangler:info] Ready on http://localhost:8787
-[wrangler:info] GET / 200 OK (35ms)
-[wrangler:info] GET /list 200 OK (114ms)
-[wrangler:info] GET /ai/gemini 200 OK (31ms)
