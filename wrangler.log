@@ -1,0 +1,80 @@
+
+ ⛅️ wrangler 4.67.0
+───────────────────
+Your Worker has access to the following bindings:
+Binding                Resource       Mode
+env.VPSAI (vpsai)      R2 Bucket      local
+
+⎔ Starting local server...
+*** Fatal uncaught kj::Exception: kj/async-io-unix.c++:945: failed: ::bind(sockfd, &addr.generic, addrlen): Address already in use; toString() = 127.0.0.1:8787
+stack: /home/jules/.npm/_npx/32026684e21afda6/node_modules/@cloudflare/workerd-linux-64/bin/workerd@4deeff6 /home/jules/.npm/_npx/32026684e21afda6/node_modules/@cloudflare/workerd-linux-64/bin/workerd@4deedc9 [wrangler:info] GET /check 200 OK (146ms)
+[wrangler:info] GET /p/transparent/53e4e825-744e-4364-b43d-eea10b89695e 200 OK (73ms)
+[wrangler:info] HEAD /r/transparent/aHR0cHM6Ly9pYW5hLm9yZy9kb21haW5zL2V4YW1wbGU9 404 Not Found (298ms)
+[wrangler:info] GET /r/transparent/aHR0cHM6Ly9leGFtcGxlLmNvbQ== 200 OK (72ms)
+jules/.npm/_npx/32026684e21afda6/node_modules/@cloudflare/workerd-linux-64/bin/workerd@1f27e4d /home/jules/.npm/_npx/32026684e21afda6/node_modules/@cloudflare/workerd-linux-64/bin/workerd@1f295e6 /home/jules/.npm/_npx/32026684e21afda6/node_modules/@cloudflare/workerd-linux-64/bin/workerd@1e902be /home/jules/.npm/_npx/32026684e21afda6/node_modules/@cloudflare/workerd-linux-64/bin/workerd@4e1f418 /home/jules/.npm/_npx/32026684e21afda6/node_modules/@cloudflare/workerd-linux-64/bin/workerd@4e1f860 /home/jules/.npm/_npx/32026684e21afda6/node_modules/@cloudflare/workerd-linux-64/bin/workerd@4e1d715 /home/jules/.npm/_npx/32026684e21afda6/node_modules/@cloudflare/workerd-linux-64/bin/workerd@4e1d528 /home/jules/.npm/_npx/32026684e21afda6/node_modules/@cloudflare/workerd-linux-64/bin/workerd@1e79c9c /lib/x86_64-linux-gnu/libc.so.6@2a1c9 /lib/x86_64-linux-gnu/libc.so.6@2a28a /home/jules/.npm/_npx/32026684e21afda6/node_modules/@cloudflare/workerd-linux-64/bin/workerd@1e79024
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mAddress already in use (127.0.0.1:8787). Please check that you are not already running a server on this address or specify a different port with --port.[0m
+
+
+🪵  Logs were written to "/home/jules/.config/.wrangler/logs/wrangler-2026-02-21_06-54-46_919.log"
+fatal error: all goroutines are asleep - deadlock!
+
+goroutine 1 [chan receive]:
+github.com/evanw/esbuild/internal/helpers.(*ThreadSafeWaitGroup).Wait(...)
+	github.com/evanw/esbuild/internal/helpers/waitgroup.go:36
+main.runService.func2()
+	github.com/evanw/esbuild/cmd/esbuild/service.go:114 +0x53
+main.runService(0x1)
+	github.com/evanw/esbuild/cmd/esbuild/service.go:160 +0x4c3
+main.main()
+	github.com/evanw/esbuild/cmd/esbuild/main.go:252 +0xb75
+
+goroutine 21 [chan receive]:
+main.runService.func1()
+	github.com/evanw/esbuild/cmd/esbuild/service.go:98 +0x45
+created by main.runService in goroutine 1
+	github.com/evanw/esbuild/cmd/esbuild/service.go:97 +0x1ce
+
+goroutine 22 [chan receive]:
+main.(*serviceType).sendRequest(0xc000110ea0, {0x9f48c0, 0xc00057ecc0})
+	github.com/evanw/esbuild/cmd/esbuild/service.go:192 +0x12b
+main.runService.func3()
+	github.com/evanw/esbuild/cmd/esbuild/service.go:125 +0x3e
+created by main.runService in goroutine 1
+	github.com/evanw/esbuild/cmd/esbuild/service.go:122 +0x2d0
+
+goroutine 11 [sync.WaitGroup.Wait]:
+sync.runtime_SemacquireWaitGroup(0xc0000af0b0?, 0x80?)
+	runtime/sema.go:114 +0x2e
+sync.(*WaitGroup).Wait(0xc000429860)
+	sync/waitgroup.go:206 +0x85
+github.com/evanw/esbuild/internal/bundler.ScanBundle(_, {_, _, _, _, _, _}, {_, _}, 0xc00007e2a0, ...)
+	github.com/evanw/esbuild/internal/bundler/bundler.go:1485 +0x9be
+github.com/evanw/esbuild/pkg/api.rebuildImpl({0xc00007e2a0, {0xc000010ca8, 0x1, 0x1}, {0x0, 0x0, 0x0}, {0x0, 0x1, 0x0, ...}, ...}, ...)
+	github.com/evanw/esbuild/pkg/api/api_impl.go:1493 +0x2c6
+github.com/evanw/esbuild/pkg/api.(*internalContext).rebuild(_)
+	github.com/evanw/esbuild/pkg/api/api_impl.go:1007 +0x27d
+github.com/evanw/esbuild/pkg/api.(*internalContext).Watch.func1()
+	github.com/evanw/esbuild/pkg/api/api_impl.go:1092 +0x25
+github.com/evanw/esbuild/pkg/api.(*watcher).start.func1()
+	github.com/evanw/esbuild/pkg/api/watcher.go:123 +0xc3
+created by github.com/evanw/esbuild/pkg/api.(*watcher).start in goroutine 25
+	github.com/evanw/esbuild/pkg/api/watcher.go:98 +0x65
+
+goroutine 101 [chan receive]:
+main.(*serviceType).sendRequest(0xc000110ea0, {0x9f48c0, 0xc000720360})
+	github.com/evanw/esbuild/cmd/esbuild/service.go:192 +0x12b
+main.(*serviceType).convertPlugins.func2.2()
+	github.com/evanw/esbuild/cmd/esbuild/service.go:963 +0x117
+github.com/evanw/esbuild/pkg/api.(*pluginImpl).onStart-fm.(*pluginImpl).onStart.func1()
+	github.com/evanw/esbuild/pkg/api/api_impl.go:1865 +0x35
+github.com/evanw/esbuild/internal/bundler.ScanBundle.func1({{0xa7dc43, 0x12}, {0xc000010c30, 0x1, 0x1}, {0xc00043f500, 0x1, 0x1}, {0xc00043f560, 0x1, ...}}, ...)
+	github.com/evanw/esbuild/internal/bundler/bundler.go:1391 +0x5e
+created by github.com/evanw/esbuild/internal/bundler.ScanBundle in goroutine 11
+	github.com/evanw/esbuild/internal/bundler/bundler.go:1390 +0x10de
+
+goroutine 103 [chan send]:
+github.com/evanw/esbuild/internal/bundler.ScanBundle.func2()
+	github.com/evanw/esbuild/internal/bundler/bundler.go:1425 +0x2c5
+created by github.com/evanw/esbuild/internal/bundler.ScanBundle in goroutine 11
+	github.com/evanw/esbuild/internal/bundler/bundler.go:1423 +0x97d

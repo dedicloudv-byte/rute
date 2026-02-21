@@ -1,7 +1,11 @@
-import { Hono } from 'hono';
+import { Context, Hono } from 'hono';
 import { getFrontend } from './frontend';
 
-const app = new Hono();
+interface Env {
+  VPSAI: R2Bucket;
+}
+
+const app = new Hono<{ Bindings: Env }>();
 
 // Route untuk melayani frontend
 app.get('/', (c) => {
@@ -23,7 +27,9 @@ app.get('/check', async (c) => {
     });
 
     if (response.ok) {
-      return c.json({ ok: true, status: response.status });
+      const id = crypto.randomUUID();
+      await c.env.VPSAI.put(id, targetUrl);
+      return c.json({ ok: true, status: response.status, id });
     } else {
       return c.json({
         ok: false,
@@ -36,17 +42,32 @@ app.get('/check', async (c) => {
   }
 });
 
-// Route utama untuk proxy dengan dukungan sub-path
-app.all('/p/:mode/:encodedUrl/:path{.+}?', async (c) => {
+// Route internal untuk aset dan link (menggunakan Base64 untuk efisiensi)
+app.all('/r/:mode/:encodedUrl/:path{.+}?', async (c) => {
   const { mode, encodedUrl, path } = c.req.param();
   let targetBaseUrl: string;
-
   try {
-    targetBaseUrl = atob(encodedUrl);
+    // Kembalikan ke format Base64 standar dari format URL-safe
+    const standardBase64 = encodedUrl.replace(/_/g, '/').replace(/-/g, '+');
+    targetBaseUrl = atob(standardBase64);
   } catch (err) {
-    return c.text('URL terenkripsi tidak valid', 400);
+    return c.text('URL tidak valid', 400);
   }
+  return handleProxy(c, mode, targetBaseUrl, path);
+});
 
+// Route utama untuk proxy dengan dukungan ID dari R2
+app.all('/p/:mode/:id/:path{.+}?', async (c) => {
+  const { mode, id, path } = c.req.param();
+  const obj = await c.env.VPSAI.get(id);
+  if (!obj) return c.text('Endpoint tidak ditemukan atau telah kedaluwarsa', 404);
+
+  const targetBaseUrl = await obj.text();
+  return handleProxy(c, mode, targetBaseUrl, path);
+});
+
+// Fungsi inti untuk menangani proxy
+async function handleProxy(c: Context<{ Bindings: Env }>, mode: string, targetBaseUrl: string, path?: string) {
   // Bangun target URL lengkap dengan path dan query parameters
   const targetUrlObj = new URL(targetBaseUrl);
 
@@ -168,7 +189,7 @@ app.all('/p/:mode/:encodedUrl/:path{.+}?', async (c) => {
   } catch (err) {
     return c.text('Gagal mengambil konten dari: ' + targetUrl, 502);
   }
-});
+}
 
 // Fungsi bantuan untuk merombak URL
 function rewriteUrl(url: string, baseUrl: string, mode: string, workerUrl: string) {
@@ -182,9 +203,11 @@ function rewriteUrl(url: string, baseUrl: string, mode: string, workerUrl: strin
     return url;
   }
 
-  // Buat URL baru yang melalui proxy
+  // Buat URL baru yang melalui proxy internal (r)
   const workerBase = new URL(workerUrl).origin;
-  return `${workerBase}/p/${mode}/${btoa(absoluteUrl)}`;
+  // Gunakan URL-safe Base64 (replace / with _ and + with -)
+  const safeBase64 = btoa(absoluteUrl).replace(/\//g, '_').replace(/\+/g, '-');
+  return `${workerBase}/r/${mode}/${safeBase64}`;
 }
 
 export default app;

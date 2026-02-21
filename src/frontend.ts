@@ -143,8 +143,8 @@ export const getFrontend = (workerUrl: string) => `
                 const checkData = await checkRes.json();
 
                 if (checkData.ok) {
-                    const encoded = btoa(target);
                     const origin = window.location.origin;
+                    const id = checkData.id;
 
                     const modes = [
                         { id: 'transparent', label: 'Transparent Endpoint' },
@@ -153,7 +153,7 @@ export const getFrontend = (workerUrl: string) => `
                     ];
 
                     modes.forEach(m => {
-                        const url = origin + '/p/' + m.id + '/' + encoded;
+                        const url = origin + '/p/' + m.id + '/' + id;
                         endpointsContainer.appendChild(createEndpointUI(m.label, url));
                         if (m.id === selectedMode) primaryUrl = url;
                     });
