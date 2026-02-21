@@ -13,33 +13,42 @@ app.get('/', (c) => {
 });
 
 // Endpoint untuk cek ketersediaan target (Health Check)
-app.get('/check', async (c) => {
-  const targetUrl = c.req.query('url');
+app.post('/check', async (c) => {
+  let body: any;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ ok: false, error: 'Request body tidak valid' }, 400);
+  }
+
+  const { url: targetUrl, key: apiKey, provider } = body;
+
   if (!targetUrl) return c.json({ ok: false, error: 'URL tidak valid' }, 400);
 
   try {
-    // Gunakan GET tapi batasi hanya ambil header untuk efisiensi jika mungkin,
-    // namun banyak API butuh GET penuh.
     const response = await fetch(targetUrl, {
       method: 'GET',
       redirect: 'follow',
-      headers: { 'User-Agent': 'Smart-Proxy-Checker/1.0' }
+      headers: { 'User-Agent': 'Smart-Proxy-Elite-Checker/1.0' }
     });
 
-    if (response.ok) {
-      const id = crypto.randomUUID();
-      // Simpan URL di body dan juga di metadata untuk listing yang cepat
-      await c.env.VPSAI.put(id, targetUrl, {
-        customMetadata: { url: targetUrl }
-      });
-      return c.json({ ok: true, status: response.status, id });
-    } else {
-      return c.json({
-        ok: false,
-        status: response.status,
-        error: `Target mengembalikan status ${response.status} (${response.statusText || 'Unknown'})`
-      });
-    }
+    // Kita anggap "OK" jika server merespons, meskipun statusnya bukan 200 (misal 401/404 pada root API)
+    const id = crypto.randomUUID();
+    const config = { url: targetUrl, key: apiKey, provider: provider };
+
+    await c.env.VPSAI.put(id, JSON.stringify(config), {
+      customMetadata: {
+        url: targetUrl,
+        provider: provider || 'custom'
+      }
+    });
+
+    return c.json({
+      ok: true,
+      status: response.status,
+      warning: response.ok ? null : `Target merespons dengan status ${response.status}`,
+      id
+    });
   } catch (err: any) {
     return c.json({ ok: false, error: 'Gagal terhubung ke target: ' + (err.message || 'Unknown error') }, 500);
   }
@@ -65,6 +74,7 @@ app.get('/list', async (c) => {
   const items = list.objects.map(obj => ({
     id: obj.key,
     url: obj.customMetadata?.url || 'Unknown',
+    provider: obj.customMetadata?.provider || 'custom',
     uploaded: obj.uploaded
   }));
   return c.json({ ok: true, items });
@@ -83,12 +93,23 @@ app.all('/p/:mode/:id/:path{.+}?', async (c) => {
   const obj = await c.env.VPSAI.get(id);
   if (!obj) return c.text('Endpoint tidak ditemukan atau telah kedaluwarsa', 404);
 
-  const targetBaseUrl = await obj.text();
-  return handleProxy(c, mode, targetBaseUrl, path);
+  const rawData = await obj.text();
+  let targetBaseUrl: string;
+  let config: any = {};
+
+  try {
+    config = JSON.parse(rawData);
+    targetBaseUrl = config.url;
+  } catch {
+    // Fallback untuk data lama yang hanya menyimpan string URL
+    targetBaseUrl = rawData;
+  }
+
+  return handleProxy(c, mode, targetBaseUrl, path, config);
 });
 
 // Fungsi inti untuk menangani proxy
-async function handleProxy(c: Context<{ Bindings: Env }>, mode: string, targetBaseUrl: string, path?: string) {
+async function handleProxy(c: Context<{ Bindings: Env }>, mode: string, targetBaseUrl: string, path?: string, config?: any) {
   // Bangun target URL lengkap dengan path dan query parameters
   const targetUrlObj = new URL(targetBaseUrl);
 
@@ -126,6 +147,21 @@ async function handleProxy(c: Context<{ Bindings: Env }>, mode: string, targetBa
   for (const [key, value] of Object.entries(incomingHeaders)) {
     if (!restrictedHeaders.includes(key.toLowerCase())) {
       newHeaders.set(key, value);
+    }
+  }
+
+  // Suntikkan API Key jika ada di config
+  if (config?.key && config?.provider) {
+    const provider = config.provider.toLowerCase();
+    const key = config.key;
+
+    if (['openai', 'mistral', 'groq', 'perplexity'].includes(provider)) {
+      newHeaders.set('Authorization', `Bearer ${key}`);
+    } else if (provider === 'anthropic' || provider === 'claude') {
+      newHeaders.set('x-api-key', key);
+      newHeaders.set('anthropic-version', '2023-06-01');
+    } else if (provider === 'gemini') {
+      newHeaders.set('x-goog-api-key', key);
     }
   }
 
