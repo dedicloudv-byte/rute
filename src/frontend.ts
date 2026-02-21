@@ -38,11 +38,11 @@ export const getFrontend = (workerUrl: string) => `
             grid-template-columns: 1fr 380px;
             gap: 2rem;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1300px;
         }
 
         @media (max-width: 1024px) {
-            .layout { grid-template-columns: 1fr; }
+            .layout { display: flex; flex-direction: column-reverse; }
             body { padding: 1rem; }
         }
 
@@ -55,6 +55,8 @@ export const getFrontend = (workerUrl: string) => `
             padding: 2rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             height: fit-content;
+            position: sticky;
+            top: 2rem;
         }
 
         @media (max-width: 640px) {
@@ -152,9 +154,10 @@ export const getFrontend = (workerUrl: string) => `
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            max-height: 600px;
+            max-height: 400px;
             overflow-y: auto;
             padding-right: 0.5rem;
+            margin-bottom: 2rem;
         }
 
         .stored-item {
@@ -215,59 +218,62 @@ export const getFrontend = (workerUrl: string) => `
 <body>
     <div class="layout">
         <div class="main-panel">
-            <h1>Smart Proxy Elite</h1>
+            <h1 id="panelTitle">Smart Proxy Elite</h1>
 
-            <div class="form-group">
-                <label>AI Templates (Quick Select - Optimized for latest SDKs)</label>
-                <div id="aiTemplates" class="template-grid">
-                    <div class="template-chip" onclick="selectTemplate('openai')">OpenAI</div>
-                    <div class="template-chip" onclick="selectTemplate('claude')">Claude</div>
-                    <div class="template-chip" onclick="selectTemplate('gemini')">Gemini (New)</div>
-                    <div class="template-chip" onclick="selectTemplate('groq')">Groq</div>
-                    <div class="template-chip" onclick="selectTemplate('mistral')">Mistral</div>
-                    <div class="template-chip" onclick="selectTemplate('perplexity')">Perplexity</div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Target URL (Endpoint)</label>
-                <input type="text" id="targetUrl" placeholder="https://api.example.com" value="https://example.com">
-            </div>
-
-            <div class="form-group">
-                <label>API Key (Optional)</label>
-                <input type="password" id="apiKey" placeholder="sk-...">
-            </div>
-
-            <div class="form-group">
-                <label>Anonymity Mode</label>
-                <select id="proxyMode">
-                    <option value="transparent">Transparent (Full Header)</option>
-                    <option value="anonymous">Anonymous (Hidden IP)</option>
-                    <option value="elite">Elite (Stealth Mode)</option>
-                </select>
-            </div>
-
-            <button id="generateBtn" class="btn btn-primary">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                <span>Generate Proxy API</span>
-            </button>
-
-            <div id="gatewayBox" class="main-panel" style="margin-top: 2rem; border-style: dashed; border-color: var(--primary);">
-                <h2 style="color: var(--primary); margin-bottom: 1rem;">Direct AI Gateway (No ID Needed)</h2>
+            <div id="configSection">
                 <div class="form-group">
-                    <label>Quick Prompt Test</label>
-                    <input type="text" id="gatewayPrompt" placeholder="What is the meaning of life?" value="Halo, siapa kamu?">
+                    <label>API Key (Essential for AI Proxies)</label>
+                    <input type="password" id="apiKey" placeholder="sk-..." class="main-input">
                 </div>
-                <div id="gatewayUrlDisplay" class="url-text" style="margin-bottom: 1rem; display: none; word-break: break-all;"></div>
-                <button id="gatewayBtn" class="btn btn-primary" style="background: var(--primary);">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 2l-18 10 18 10-2-10 2-10zM2 12l21 0"/></svg>
-                    <span>Execute Direct Request</span>
-                </button>
 
-                <div id="gatewayResult" class="preview-container" style="margin-top: 1.5rem;">
-                    <div style="color: var(--text-dim); font-size: 0.7rem; font-weight: 700; margin-bottom: 0.75rem; text-transform: uppercase;">Gateway Response:</div>
-                    <pre id="gatewayContent" style="color: var(--success); font-family: 'JetBrains Mono', monospace; white-space: pre-wrap;"></pre>
+                <div id="gatewayActivePanel" style="display: none; margin-bottom: 2rem; padding: 2rem; background: rgba(99, 102, 241, 0.1); border-radius: 20px; border: 2px solid var(--primary);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 id="activeGatewayName" style="color: var(--primary); margin: 0;">Instant AI Gateway</h2>
+                        <button class="btn" style="width: auto; padding: 0.5rem 1rem; background: var(--glass);" onclick="resetToVault()">Close</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Direct Gateway URL (GET)</label>
+                        <div id="gatewayUrlDisplay" class="url-text" style="word-break: break-all; margin-bottom: 0.5rem; display: block; background: #000;"></div>
+                        <button class="btn" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.75rem; background: var(--primary);" onclick="copyGatewayUrl()">Copy URL</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Enter Prompt (Message to AI)</label>
+                        <textarea id="gatewayPrompt" style="width: 100%; height: 120px; padding: 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; color: white; font-family: inherit; font-size: 1rem; resize: none; margin-bottom: 1rem;">Halo, siapa kamu?</textarea>
+                    </div>
+
+                    <button id="gatewayBtn" class="btn btn-primary" style="background: var(--primary);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 2l-18 10 18 10-2-10 2-10zM2 12l21 0"/></svg>
+                        <span>Execute Direct Request</span>
+                    </button>
+
+                    <div id="gatewayResult" class="preview-container" style="margin-top: 1.5rem;">
+                        <div style="color: var(--text-dim); font-size: 0.7rem; font-weight: 700; margin-bottom: 0.75rem; text-transform: uppercase;">Response Preview:</div>
+                        <pre id="gatewayContent" style="color: var(--success); font-family: 'JetBrains Mono', monospace; white-space: pre-wrap;"></pre>
+                    </div>
+                </div>
+
+                <div id="vaultForm" class="form-group">
+                    <h2 style="margin-top: 2rem;">Custom Proxy Vault</h2>
+                    <div class="form-group">
+                        <label>Target URL (Endpoint)</label>
+                        <input type="text" id="targetUrl" placeholder="https://api.example.com" value="https://example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Anonymity Mode</label>
+                        <select id="proxyMode">
+                            <option value="transparent">Transparent (Full Header)</option>
+                            <option value="anonymous">Anonymous (Hidden IP)</option>
+                            <option value="elite">Elite (Stealth Mode)</option>
+                        </select>
+                    </div>
+
+                    <button id="generateBtn" class="btn btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        <span>Save to Private Vault</span>
+                    </button>
                 </div>
             </div>
 
@@ -288,7 +294,17 @@ export const getFrontend = (workerUrl: string) => `
         </div>
 
         <div class="side-panel">
-            <h2>Saved Proxies</h2>
+            <h2>Instant AI Gateways</h2>
+            <div id="aiTemplates" class="template-grid" style="grid-template-columns: 1fr; margin-bottom: 2rem;">
+                <div class="template-chip" onclick="selectTemplate('gemini')">✨ Gemini Gateway (New)</div>
+                <div class="template-chip" onclick="selectTemplate('openai')">🤖 OpenAI Gateway</div>
+                <div class="template-chip" onclick="selectTemplate('claude')">🧠 Claude Gateway</div>
+                <div class="template-chip" onclick="selectTemplate('groq')">⚡ Groq Gateway</div>
+                <div class="template-chip" onclick="selectTemplate('mistral')">🌪️ Mistral Gateway</div>
+                <div class="template-chip" onclick="selectTemplate('perplexity')">🔍 Perplexity Gateway</div>
+            </div>
+
+            <h2>Private Vault</h2>
             <div id="storedList" class="stored-list">
                 <div style="text-align: center; color: var(--text-dim); padding: 3rem;">Loading vault...</div>
             </div>
@@ -299,7 +315,7 @@ export const getFrontend = (workerUrl: string) => `
         const AI_TEMPLATES = {
             openai: { url: 'https://api.openai.com/v1', name: 'OpenAI' },
             claude: { url: 'https://api.anthropic.com/v1', name: 'Claude' },
-            gemini: { url: 'https://generativelanguage.googleapis.com', name: 'Gemini (GenAI SDK)' },
+            gemini: { url: 'https://generativelanguage.googleapis.com', name: 'Gemini' },
             groq: { url: 'https://api.groq.com/openai/v1', name: 'Groq' },
             mistral: { url: 'https://api.mistral.ai/v1', name: 'Mistral' },
             perplexity: { url: 'https://api.perplexity.ai', name: 'Perplexity' }
@@ -321,6 +337,9 @@ export const getFrontend = (workerUrl: string) => `
         const gatewayResult = document.getElementById('gatewayResult');
         const gatewayContent = document.getElementById('gatewayContent');
         const gatewayUrlDisplay = document.getElementById('gatewayUrlDisplay');
+        const gatewayActivePanel = document.getElementById('gatewayActivePanel');
+        const vaultForm = document.getElementById('vaultForm');
+        const activeGatewayName = document.getElementById('activeGatewayName');
 
         let activeId = null;
         let selectedProvider = null;
@@ -330,9 +349,25 @@ export const getFrontend = (workerUrl: string) => `
             const chip = Array.from(document.querySelectorAll('.template-chip')).find(el => el.innerText.toLowerCase().includes(id));
             if (chip) chip.classList.add('active');
 
-            targetUrlInput.value = AI_TEMPLATES[id].url;
             selectedProvider = id;
+            activeGatewayName.innerText = AI_TEMPLATES[id].name + ' Instant Gateway';
+            gatewayActivePanel.style.display = 'block';
+            vaultForm.style.display = 'none';
+            resultBox.classList.remove('show');
+
+            targetUrlInput.value = AI_TEMPLATES[id].url;
             updateGatewayUrl();
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetToVault() {
+            document.querySelectorAll('.template-chip').forEach(el => el.classList.remove('active'));
+            selectedProvider = null;
+            gatewayActivePanel.style.display = 'none';
+            vaultForm.style.display = 'block';
+            targetUrlInput.value = 'https://example.com';
         }
 
         function updateGatewayUrl() {
@@ -342,27 +377,28 @@ export const getFrontend = (workerUrl: string) => `
             const prompt = encodeURIComponent(gatewayPrompt.value.trim());
             const fullUrl = \`\${baseUrl}?prompt=\${prompt}&apikey=\${apikey}\`;
             gatewayUrlDisplay.innerText = fullUrl;
-            gatewayUrlDisplay.style.display = 'block';
+        }
+
+        function copyGatewayUrl() {
+            copyText(gatewayUrlDisplay.innerText, document.querySelector('#gatewayActivePanel button[onclick="copyGatewayUrl()"]'));
         }
 
         gatewayPrompt.oninput = updateGatewayUrl;
         apiKeyInput.oninput = updateGatewayUrl;
 
         gatewayBtn.onclick = async () => {
-            if (!selectedProvider) {
-                alert('Silakan pilih template AI terlebih dahulu');
-                return;
-            }
+            if (!selectedProvider) return;
             const apikey = apiKeyInput.value.trim();
             const prompt = gatewayPrompt.value.trim();
             if (!apikey) {
-                alert('API Key diperlukan untuk Direct Gateway');
+                alert('Please enter your API Key in the field above first');
+                apiKeyInput.focus();
                 return;
             }
 
             gatewayBtn.disabled = true;
             gatewayResult.style.display = 'block';
-            gatewayContent.innerText = 'Routing via Global AI Gateway...';
+            gatewayContent.innerText = 'Connecting to ' + selectedProvider + '...';
 
             try {
                 const url = \`/ai/\${selectedProvider}?prompt=\${encodeURIComponent(prompt)}&apikey=\${apikey}\`;
@@ -372,10 +408,10 @@ export const getFrontend = (workerUrl: string) => `
                 if (data.ok) {
                     gatewayContent.innerText = data.result;
                 } else {
-                    gatewayContent.innerText = 'Error: ' + (data.error || JSON.stringify(data.raw, null, 2));
+                    gatewayContent.innerText = 'Error from Provider: ' + (data.error || JSON.stringify(data.raw, null, 2));
                 }
             } catch (err) {
-                gatewayContent.innerText = 'Connection Error: ' + err.message;
+                gatewayContent.innerText = 'Connection Failed: ' + err.message;
             } finally {
                 gatewayBtn.disabled = false;
             }
