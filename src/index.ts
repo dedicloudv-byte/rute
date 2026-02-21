@@ -14,23 +14,55 @@ app.get('/check', async (c) => {
   if (!targetUrl) return c.json({ ok: false, error: 'URL tidak valid' }, 400);
 
   try {
-    const response = await fetch(targetUrl, { method: 'HEAD', redirect: 'follow' });
-    return c.json({ ok: response.ok, status: response.status });
-  } catch (err) {
-    return c.json({ ok: false, error: 'Tidak dapat menjangkau URL tujuan' }, 500);
+    // Gunakan GET tapi batasi hanya ambil header untuk efisiensi jika mungkin,
+    // namun banyak API butuh GET penuh.
+    const response = await fetch(targetUrl, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: { 'User-Agent': 'Smart-Proxy-Checker/1.0' }
+    });
+
+    if (response.ok) {
+      return c.json({ ok: true, status: response.status });
+    } else {
+      return c.json({
+        ok: false,
+        status: response.status,
+        error: `Target mengembalikan status ${response.status} (${response.statusText || 'Unknown'})`
+      });
+    }
+  } catch (err: any) {
+    return c.json({ ok: false, error: 'Gagal terhubung ke target: ' + (err.message || 'Unknown error') }, 500);
   }
 });
 
-// Route utama untuk proxy
-app.all('/p/:mode/:encodedUrl', async (c) => {
-  const { mode, encodedUrl } = c.req.param();
-  let targetUrl: string;
+// Route utama untuk proxy dengan dukungan sub-path
+app.all('/p/:mode/:encodedUrl/:path{.+}?', async (c) => {
+  const { mode, encodedUrl, path } = c.req.param();
+  let targetBaseUrl: string;
 
   try {
-    targetUrl = atob(encodedUrl);
+    targetBaseUrl = atob(encodedUrl);
   } catch (err) {
     return c.text('URL terenkripsi tidak valid', 400);
   }
+
+  // Bangun target URL lengkap dengan path dan query parameters
+  const targetUrlObj = new URL(targetBaseUrl);
+
+  if (path) {
+    // Gabungkan path tambahan
+    const originalPath = targetUrlObj.pathname === '/' ? '' : targetUrlObj.pathname;
+    targetUrlObj.pathname = originalPath + '/' + path;
+  }
+
+  // Teruskan query parameters dari request client
+  const clientUrl = new URL(c.req.url);
+  clientUrl.searchParams.forEach((value, key) => {
+    targetUrlObj.searchParams.set(key, value);
+  });
+
+  const targetUrl = targetUrlObj.toString();
 
   // Persiapkan header berdasarkan mode
   const incomingHeaders = c.req.header();
@@ -89,8 +121,7 @@ app.all('/p/:mode/:encodedUrl', async (c) => {
     // Gunakan HTMLRewriter untuk merombak link jika kontennya adalah HTML
     const contentType = resHeaders.get('content-type') || '';
     if (contentType.includes('text/html')) {
-      const urlObj = new URL(targetUrl);
-      const baseUrl = urlObj.origin;
+      const baseUrl = new URL(targetUrl).origin;
 
       const rewriter = new HTMLRewriter()
         .on('a', {

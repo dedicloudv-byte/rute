@@ -18,7 +18,12 @@ export const getFrontend = (workerUrl: string) => `
         .result { margin-top: 1.5rem; padding: 1rem; background: #e8f4fd; border-radius: 6px; display: none; }
         .result.show { display: block; }
         .result h2 { font-size: 1rem; margin-top: 0; }
-        .url-box { background: #fff; padding: 0.5rem; border: 1px solid #cfe2f3; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 0.9rem; }
+        .endpoint-item { margin-bottom: 1rem; padding: 0.75rem; background: #fff; border: 1px solid #cfe2f3; border-radius: 6px; }
+        .endpoint-label { font-size: 0.85rem; font-weight: bold; margin-bottom: 0.25rem; color: #7f8c8d; }
+        .url-row { display: flex; gap: 0.5rem; align-items: center; }
+        .url-box { flex-grow: 1; background: #f9f9f9; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 0.85rem; }
+        .copy-btn { width: auto; padding: 0.5rem 0.75rem; font-size: 0.85rem; background-color: #95a5a6; }
+        .copy-btn:hover { background-color: #7f8c8d; }
         .status { margin-top: 0.5rem; font-size: 0.85rem; }
         .status.error { color: #e74c3c; }
         .status.success { color: #27ae60; }
@@ -42,11 +47,13 @@ export const getFrontend = (workerUrl: string) => `
         <button id="generateBtn">Generate & Cek Ketersediaan</button>
 
         <div id="resultBox" class="result">
-            <h2>Domain / URL Proxy Berhasil Dihasilkan:</h2>
-            <div id="generatedUrl" class="url-box"></div>
+            <h2>API / Proxy Endpoints Berhasil Dihasilkan:</h2>
+
+            <div id="endpointsContainer"></div>
+
             <div id="statusMsg" class="status"></div>
             <br>
-            <button id="goBtn" style="background-color: #2ecc71;">Kunjungi Link Proxy</button>
+            <button id="goBtn" style="background-color: #2ecc71;">Kunjungi Endpoint Utama</button>
         </div>
     </div>
 
@@ -55,15 +62,38 @@ export const getFrontend = (workerUrl: string) => `
         const targetUrlInput = document.getElementById('targetUrl');
         const proxyModeSelect = document.getElementById('proxyMode');
         const resultBox = document.getElementById('resultBox');
-        const generatedUrlDiv = document.getElementById('generatedUrl');
+        const endpointsContainer = document.getElementById('endpointsContainer');
         const statusMsg = document.getElementById('statusMsg');
         const goBtn = document.getElementById('goBtn');
 
-        let finalUrl = '';
+        let primaryUrl = '';
+
+        function createEndpointUI(label, url) {
+            const div = document.createElement('div');
+            div.className = 'endpoint-item';
+            div.innerHTML = '<div class="endpoint-label">' + label + '</div>' +
+                '<div class="url-row">' +
+                    '<div class="url-box">' + url + '</div>' +
+                    '<button class="copy-btn" onclick="copyToClipboard(\\'' + url + '\\', this)">Copy</button>' +
+                '</div>';
+            return div;
+        }
+
+        window.copyToClipboard = (text, btn) => {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.style.backgroundColor = '#27ae60';
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.backgroundColor = '';
+                }, 2000);
+            });
+        };
 
         generateBtn.addEventListener('click', async () => {
             const target = targetUrlInput.value.trim();
-            const mode = proxyModeSelect.value;
+            const selectedMode = proxyModeSelect.value;
 
             if (!target) {
                 alert('Silakan masukkan URL tujuan');
@@ -74,6 +104,7 @@ export const getFrontend = (workerUrl: string) => `
             generateBtn.innerText = 'Mengecek ketersediaan...';
             statusMsg.innerText = '';
             resultBox.classList.remove('show');
+            endpointsContainer.innerHTML = '';
 
             try {
                 const checkRes = await fetch('/check?url=' + encodeURIComponent(target));
@@ -81,20 +112,30 @@ export const getFrontend = (workerUrl: string) => `
 
                 if (checkData.ok) {
                     const encoded = btoa(target);
-                    finalUrl = window.location.origin + '/p/' + mode + '/' + encoded;
+                    const origin = window.location.origin;
 
-                    generatedUrlDiv.innerText = finalUrl;
-                    statusMsg.innerText = 'Proxy tersedia dan siap digunakan!';
+                    const modes = [
+                        { id: 'transparent', label: 'Transparent Endpoint' },
+                        { id: 'anonymous', label: 'Anonymous Endpoint' },
+                        { id: 'elite', label: 'Elite (Highly Anonymous) Endpoint' }
+                    ];
+
+                    modes.forEach(m => {
+                        const url = origin + '/p/' + m.id + '/' + encoded;
+                        endpointsContainer.appendChild(createEndpointUI(m.label, url));
+                        if (m.id === selectedMode) primaryUrl = url;
+                    });
+
+                    statusMsg.innerText = 'API Endpoints berhasil dibuat dan siap digunakan!';
                     statusMsg.className = 'status success';
                     resultBox.classList.add('show');
                 } else {
-                    statusMsg.innerText = 'Gagal: ' + checkData.error;
+                    statusMsg.innerText = 'Gagal: ' + (checkData.error || 'Terjadi kesalahan tidak diketahui');
                     statusMsg.className = 'status error';
                     resultBox.classList.add('show');
-                    generatedUrlDiv.innerText = 'N/A';
                 }
             } catch (err) {
-                statusMsg.innerText = 'Terjadi kesalahan sistem.';
+                statusMsg.innerText = 'Terjadi kesalahan sistem saat menghubungi server.';
                 statusMsg.className = 'status error';
                 resultBox.classList.add('show');
             } finally {
@@ -104,7 +145,7 @@ export const getFrontend = (workerUrl: string) => `
         });
 
         goBtn.addEventListener('click', () => {
-            if (finalUrl) window.open(finalUrl, '_blank');
+            if (primaryUrl) window.open(primaryUrl, '_blank');
         });
     </script>
 </body>
