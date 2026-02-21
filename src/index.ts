@@ -104,7 +104,7 @@ app.all('/p/:mode/:encodedUrl/:path{.+}?', async (c) => {
     const response = await fetch(targetUrl, {
       method: c.req.method,
       headers: newHeaders,
-      body: ['GET', 'HEAD'].includes(c.req.method) ? null : await c.req.raw.blob(),
+      body: ['GET', 'HEAD'].includes(c.req.method) ? null : c.req.raw.body,
       redirect: 'follow'
     });
 

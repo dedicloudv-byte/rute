@@ -22,8 +22,12 @@ export const getFrontend = (workerUrl: string) => `
         .endpoint-label { font-size: 0.85rem; font-weight: bold; margin-bottom: 0.25rem; color: #7f8c8d; }
         .url-row { display: flex; gap: 0.5rem; align-items: center; }
         .url-box { flex-grow: 1; background: #f9f9f9; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 0.85rem; }
-        .copy-btn { width: auto; padding: 0.5rem 0.75rem; font-size: 0.85rem; background-color: #95a5a6; }
+        .copy-btn, .test-btn { width: auto; padding: 0.5rem 0.75rem; font-size: 0.85rem; background-color: #95a5a6; border: none; border-radius: 4px; color: white; cursor: pointer; }
+        .test-btn { background-color: #e67e22; }
+        .test-btn:hover { background-color: #d35400; }
         .copy-btn:hover { background-color: #7f8c8d; }
+        .preview-box { margin-top: 1rem; padding: 0.75rem; background: #2c3e50; color: #ecf0f1; border-radius: 6px; font-family: monospace; font-size: 0.85rem; max-height: 300px; overflow: auto; display: none; }
+        .preview-box.show { display: block; }
         .status { margin-top: 0.5rem; font-size: 0.85rem; }
         .status.error { color: #e74c3c; }
         .status.success { color: #27ae60; }
@@ -52,6 +56,12 @@ export const getFrontend = (workerUrl: string) => `
             <div id="endpointsContainer"></div>
 
             <div id="statusMsg" class="status"></div>
+
+            <div id="previewBox" class="preview-box">
+                <div style="color: #bdc3c7; margin-bottom: 0.5rem; font-size: 0.75rem;">Response Preview:</div>
+                <pre id="previewContent"></pre>
+            </div>
+
             <br>
             <button id="goBtn" style="background-color: #2ecc71;">Kunjungi Endpoint Utama</button>
         </div>
@@ -68,6 +78,9 @@ export const getFrontend = (workerUrl: string) => `
 
         let primaryUrl = '';
 
+        const previewBox = document.getElementById('previewBox');
+        const previewContent = document.getElementById('previewContent');
+
         function createEndpointUI(label, url) {
             const div = document.createElement('div');
             div.className = 'endpoint-item';
@@ -75,9 +88,27 @@ export const getFrontend = (workerUrl: string) => `
                 '<div class="url-row">' +
                     '<div class="url-box">' + url + '</div>' +
                     '<button class="copy-btn" onclick="copyToClipboard(\\'' + url + '\\', this)">Copy</button>' +
+                    '<button class="test-btn" onclick="testEndpoint(\\'' + url + '\\')">Test</button>' +
                 '</div>';
             return div;
         }
+
+        window.testEndpoint = async (url) => {
+            previewBox.classList.add('show');
+            previewContent.innerText = 'Fetching...';
+            try {
+                const res = await fetch(url);
+                const text = await res.text();
+                try {
+                    const json = JSON.parse(text);
+                    previewContent.innerText = JSON.stringify(json, null, 2);
+                } catch (e) {
+                    previewContent.innerText = text;
+                }
+            } catch (err) {
+                previewContent.innerText = 'Error testing endpoint: ' + err.message;
+            }
+        };
 
         window.copyToClipboard = (text, btn) => {
             navigator.clipboard.writeText(text).then(() => {
@@ -104,6 +135,7 @@ export const getFrontend = (workerUrl: string) => `
             generateBtn.innerText = 'Mengecek ketersediaan...';
             statusMsg.innerText = '';
             resultBox.classList.remove('show');
+            previewBox.classList.remove('show');
             endpointsContainer.innerHTML = '';
 
             try {
