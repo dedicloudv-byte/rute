@@ -114,9 +114,10 @@ async function handleProxy(c: Context<{ Bindings: Env }>, mode: string, targetBa
   const targetUrlObj = new URL(targetBaseUrl);
 
   if (path) {
-    // Gabungkan path tambahan
-    const originalPath = targetUrlObj.pathname === '/' ? '' : targetUrlObj.pathname;
-    targetUrlObj.pathname = originalPath + '/' + path;
+    // Gabungkan path tambahan dengan penanganan slash yang bersih
+    const cleanOriginalPath = targetUrlObj.pathname.replace(/\/$/, '');
+    const cleanSubPath = path.replace(/^\//, '');
+    targetUrlObj.pathname = cleanOriginalPath + '/' + cleanSubPath;
   }
 
   // Teruskan query parameters dari request client

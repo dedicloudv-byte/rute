@@ -276,7 +276,7 @@ export const getFrontend = (workerUrl: string) => `
         const AI_TEMPLATES = {
             openai: { url: 'https://api.openai.com/v1', name: 'OpenAI' },
             claude: { url: 'https://api.anthropic.com/v1', name: 'Claude' },
-            gemini: { url: 'https://generativelanguage.googleapis.com', name: 'Gemini' },
+            gemini: { url: 'https://generativelanguage.googleapis.com/v1beta', name: 'Gemini' },
             groq: { url: 'https://api.groq.com/openai/v1', name: 'Groq' },
             mistral: { url: 'https://api.mistral.ai/v1', name: 'Mistral' },
             perplexity: { url: 'https://api.perplexity.ai', name: 'Perplexity' }
