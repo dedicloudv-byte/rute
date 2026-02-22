@@ -1,0 +1,13 @@
+
+ ⛅️ wrangler 4.67.0
+───────────────────
+Your Worker has access to the following bindings:
+Binding                Resource       Mode
+env.VPSAI (vpsai)      R2 Bucket      local
+
+⎔ Starting local server...
+[wrangler:info] Ready on http://localhost:8787
+[wrangler:info] GET / 200 OK (15ms)
+[wrangler:info] GET /list 200 OK (34ms)
+[wrangler:info] POST /check 200 OK (63ms)
+[wrangler:info] GET /list 200 OK (4ms)

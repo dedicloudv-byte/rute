@@ -226,8 +226,8 @@ export const getFrontend = (workerUrl: string) => `
             <div id="vaultForm">
                 <div class="section-title">Create Private Vault</div>
                 <div class="input-group">
-                    <label class="input-label">Target API URL</label>
-                    <input type="text" id="targetUrl" value="https://example.com">
+                    <label class="input-label">Target AI End Point (Gemini, OpenAI, etc.)</label>
+                    <input type="text" id="targetUrl" placeholder="https://api.openai.com/v1" value="https://example.com">
                 </div>
                 <div class="input-group">
                     <label class="input-label">Provider API Key</label>
@@ -236,19 +236,30 @@ export const getFrontend = (workerUrl: string) => `
                 <div class="input-group">
                     <label class="input-label">Security Mode</label>
                     <select id="proxyMode">
-                        <option value="elite">Elite Stealth</option>
-                        <option value="anonymous">Anonymous</option>
-                        <option value="transparent">Transparent</option>
+                        <option value="elite">Elite Stealth Proxy</option>
+                        <option value="anonymous">Anonymous Proxy</option>
+                        <option value="transparent">Transparent Proxy</option>
                     </select>
                 </div>
-                <button id="saveBtn" class="main-btn">Initialize Vault</button>
+                <button id="saveBtn" class="main-btn">Initialize Vault & Generate API</button>
             </div>
 
             <div id="vaultResult" class="result-area">
-                <div class="section-title">Deployment Success</div>
+                <div class="section-title">API Deployment Success</div>
+
+                <div id="directApiSection" style="display:none;">
+                    <div class="access-card" style="border-color: var(--primary); background: rgba(99, 102, 241, 0.1);">
+                        <div style="font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">DIRECT CLIENT API (GET Format)</div>
+                        <div class="url-box">
+                            <div id="directClientUrl" class="url-text" style="color: white;">-</div>
+                            <button class="copy-btn" onclick="copyText(document.getElementById('directClientUrl').innerText, this)">Copy</button>
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">Gunakan format ini untuk pemanggilan API langsung dengan parameter prompt dan apikey.</p>
+                    </div>
+                </div>
 
                 <div class="access-card" style="border-color: var(--success); background: rgba(16, 185, 129, 0.05);">
-                    <div style="font-weight: 700; color: var(--success); margin-bottom: 0.5rem;">PROXY API KEY</div>
+                    <div style="font-weight: 700; color: var(--success); margin-bottom: 0.5rem;">PROXY VAULT KEY (Bearer Token)</div>
                     <div class="url-box">
                         <div id="newProxyKey" class="url-text" style="color: white;">-</div>
                         <button class="copy-btn" onclick="copyText(document.getElementById('newProxyKey').innerText, this)">Copy</button>
@@ -258,22 +269,23 @@ export const getFrontend = (workerUrl: string) => `
                 <div id="deploymentCards"></div>
 
                 <div class="tester-section">
-                    <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Interactive Tester</h3>
+                    <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Interactive Live Tester</h3>
                     <div class="input-group">
                         <label class="input-label">Endpoint</label>
                         <input type="text" id="testEndpoint" readonly>
                     </div>
                     <div class="input-group">
-                        <label class="input-label">Proxy Key</label>
+                        <label class="input-label">Proxy Key / API Key</label>
                         <input type="text" id="testProxyKey">
                     </div>
                     <div class="input-group">
                         <label class="input-label">Prompt</label>
                         <textarea id="testPrompt" rows="3" placeholder="Test message..."></textarea>
                     </div>
-                    <button id="runTestBtn" class="main-btn">Execute Test</button>
+                    <button id="runTestBtn" class="main-btn">Execute Test Request</button>
 
                     <div id="testOutput" style="display:none; margin-top: 1.5rem; background: #000; padding: 1rem; border-radius: 12px; border: 1px solid var(--border);">
+                        <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.5rem;">Raw Provider Response:</div>
                         <pre id="testResultText" style="color: var(--success); font-family: monospace; font-size: 0.8rem; white-space: pre-wrap;"></pre>
                     </div>
                 </div>
@@ -281,9 +293,10 @@ export const getFrontend = (workerUrl: string) => `
         </main>
 
         <aside class="sidebar glass">
-            <h2>Templates</h2>
+            <h2>AI Templates</h2>
             <div class="provider-item" onclick="selectTemplate('gemini')">✨ Gemini 2.0 Flash</div>
             <div class="provider-item" onclick="selectTemplate('openai')">🤖 GPT-4o</div>
+            <div class="provider-item" onclick="selectTemplate('claude')">🧠 Claude 3.5 Sonnet</div>
 
             <h2 style="margin-top: 2rem;">My Vaults</h2>
             <div id="vaultList"></div>
@@ -296,71 +309,127 @@ export const getFrontend = (workerUrl: string) => `
 
         function selectTemplate(id) {
             currentProvider = id;
-            document.getElementById('targetUrl').value = id === 'gemini' ? 'https://generativelanguage.googleapis.com' : 'https://api.openai.com/v1';
+            if (id === 'gemini') {
+                document.getElementById('targetUrl').value = 'https://generativelanguage.googleapis.com';
+            } else if (id === 'openai') {
+                document.getElementById('targetUrl').value = 'https://api.openai.com/v1';
+            } else if (id === 'claude') {
+                document.getElementById('targetUrl').value = 'https://api.anthropic.com/v1';
+            }
+            document.querySelectorAll('.provider-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
         }
 
         function copyText(t, b) {
             navigator.clipboard.writeText(t);
+            const original = b.innerText;
             b.innerText = 'Copied';
-            setTimeout(() => b.innerText = 'Copy', 2000);
+            setTimeout(() => b.innerText = original, 2000);
         }
 
         async function fetchVaults() {
-            const res = await fetch('/list');
-            const data = await res.json();
-            const list = document.getElementById('vaultList');
-            list.innerHTML = '';
-            data.items.forEach(item => {
-                const d = document.createElement('div');
-                d.className = 'vault-card';
-                d.innerHTML = \`
-                    <div style="font-size: 0.8rem; font-weight: 600;">\${item.url}</div>
-                    <div class="delete-btn" onclick="event.stopPropagation(); deleteVault('\${item.id}')">Delete</div>
-                \`;
-                d.onclick = () => showDetails(item.id, item.url, item.provider);
-                list.appendChild(d);
-            });
+            try {
+                const res = await fetch('/list');
+                const data = await res.json();
+                const list = document.getElementById('vaultList');
+                list.innerHTML = '';
+                if (data.items.length === 0) {
+                    list.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 1rem;">Vault is empty.</div>';
+                    return;
+                }
+                data.items.forEach(item => {
+                    const d = document.createElement('div');
+                    d.className = 'vault-card';
+                    d.innerHTML = \`
+                        <div style="font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">\${item.url}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 4px;">\${item.provider} • \${item.id.substring(0,8)}</div>
+                        <div class="delete-btn" onclick="event.stopPropagation(); deleteVault('\${item.id}')">Delete</div>
+                    \`;
+                    d.onclick = () => showDetails(item.id, item.url, item.provider);
+                    list.appendChild(d);
+                });
+            } catch (e) {
+                console.error('Failed to fetch vaults');
+            }
         }
 
         async function deleteVault(id) {
-            if(confirm('Delete?')) {
+            if(confirm('Are you sure you want to delete this vault?')) {
                 await fetch('/delete/' + id, { method: 'DELETE' });
                 fetchVaults();
             }
         }
 
-        function showDetails(id, url, provider, vaultKey = '') {
+        function showDetails(id, url, provider, vaultKey = '', providerKey = '') {
             document.getElementById('vaultResult').classList.add('active');
             document.getElementById('vaultForm').style.display = 'none';
+
             if (vaultKey) {
                 document.getElementById('newProxyKey').innerText = vaultKey;
                 document.getElementById('testProxyKey').value = vaultKey;
+            } else {
+                document.getElementById('newProxyKey').innerText = '(Key Hidden)';
+                document.getElementById('testProxyKey').value = '';
             }
+
+            const directApiSection = document.getElementById('directApiSection');
+            const directClientUrl = document.getElementById('directClientUrl');
+
+            if (provider !== 'custom') {
+                directApiSection.style.display = 'block';
+                const base = window.location.origin;
+                const exampleKey = providerKey || 'YOUR_API_KEY';
+                directClientUrl.innerText = \`\${base}/ai/\${provider}?prompt=Halo&apikey=\${exampleKey}\`;
+            } else {
+                directApiSection.style.display = 'none';
+            }
+
             const cards = document.getElementById('deploymentCards');
             cards.innerHTML = '';
-            ['elite', 'anonymous'].forEach(mode => {
+            ['elite', 'anonymous', 'transparent'].forEach(mode => {
                 const pUrl = window.location.origin + '/p/' + mode + '/' + id;
                 const c = document.createElement('div');
                 c.className = 'access-card';
-                c.innerHTML = \`<div style="font-size: 0.7rem;">\${mode.toUpperCase()}</div><div class="url-box"><div class="url-text">\${pUrl}</div><button class="copy-btn" onclick="copyText('\${pUrl}', this)">Copy</button></div>\`;
+                c.innerHTML = \`
+                    <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">\${mode} Protocol</div>
+                    <div class="url-box">
+                        <div class="url-text">\${pUrl}</div>
+                        <button class="copy-btn" onclick="copyText('\${pUrl}', this)">Copy</button>
+                    </div>
+                \`;
                 cards.appendChild(c);
             });
             document.getElementById('testEndpoint').value = window.location.origin + '/p/elite/' + id;
             currentVaultData = { id, provider };
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         document.getElementById('saveBtn').onclick = async () => {
+            const btn = document.getElementById('saveBtn');
             const url = document.getElementById('targetUrl').value;
             const key = document.getElementById('providerApiKey').value;
-            const res = await fetch('/check', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url, key, provider: currentProvider })
-            });
-            const data = await res.json();
-            if(data.ok) {
-                showDetails(data.id, url, currentProvider, data.vaultKey);
-                fetchVaults();
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader"></div>';
+
+            try {
+                const res = await fetch('/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, key, provider: currentProvider })
+                });
+                const data = await res.json();
+                if(data.ok) {
+                    showDetails(data.id, url, currentProvider, data.vaultKey, key);
+                    fetchVaults();
+                } else {
+                    alert('Error initializing vault: ' + data.error);
+                }
+            } catch (e) {
+                alert('Connection error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Initialize Vault & Generate API';
             }
         };
 
@@ -370,28 +439,50 @@ export const getFrontend = (workerUrl: string) => `
             const outText = document.getElementById('testResultText');
             btn.disabled = true;
             output.style.display = 'block';
-            outText.innerText = 'Connecting...';
+            outText.innerText = 'Connecting to proxy...';
 
             try {
                 let testUrl = document.getElementById('testEndpoint').value;
                 let body = null;
+                let method = 'POST';
+                let headers = {
+                    'Authorization': 'Bearer ' + document.getElementById('testProxyKey').value,
+                    'Content-Type': 'application/json'
+                };
+
                 if (currentVaultData.provider === 'gemini') {
                     testUrl += '/v1beta/models/gemini-2.0-flash-exp:generateContent';
-                    body = JSON.stringify({ contents: [{ parts: [{ text: document.getElementById('testPrompt').value || 'Hi' }] }] });
-                } else {
+                    body = JSON.stringify({ contents: [{ parts: [{ text: document.getElementById('testPrompt').value || 'Hello' }] }] });
+                } else if (currentVaultData.provider === 'openai') {
                     testUrl += '/chat/completions';
-                    body = JSON.stringify({ model: 'gpt-4o', messages: [{ role: 'user', content: document.getElementById('testPrompt').value || 'Hi' }] });
+                    body = JSON.stringify({ model: 'gpt-4o', messages: [{ role: 'user', content: document.getElementById('testPrompt').value || 'Hello' }] });
+                } else if (currentVaultData.provider === 'claude') {
+                    testUrl += '/messages';
+                    body = JSON.stringify({
+                        model: 'claude-3-5-sonnet-20240620',
+                        max_tokens: 1024,
+                        messages: [{ role: 'user', content: document.getElementById('testPrompt').value || 'Hello' }]
+                    });
+                } else {
+                    // Generic test for custom URL
+                    method = 'GET';
+                    body = null;
                 }
 
                 const res = await fetch(testUrl, {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + document.getElementById('testProxyKey').value, 'Content-Type': 'application/json' },
+                    method: method,
+                    headers: headers,
                     body: body
                 });
                 const data = await res.text();
-                outText.innerText = data;
+                try {
+                    const json = JSON.parse(data);
+                    outText.innerText = JSON.stringify(json, null, 2);
+                } catch {
+                    outText.innerText = data;
+                }
             } catch (e) {
-                outText.innerText = 'Error: ' + e.message;
+                outText.innerText = 'Test Error: ' + e.message;
             } finally {
                 btn.disabled = false;
             }

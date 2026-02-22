@@ -182,24 +182,14 @@ app.get('/ai/:provider', async (c) => {
       body: JSON.stringify(body)
     });
 
-    const data: any = await response.json();
+    // Ambil semua header dari response asli
+    const resHeaders = new Headers(response.headers);
+    resHeaders.set('Access-Control-Allow-Origin', '*');
 
-    // Normalisasi respons untuk klien
-    let resultText = '';
-    if (provider === 'gemini' || provider === 'gimini') {
-      resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gemini';
-    } else if (['openai', 'groq', 'mistral', 'perplexity'].includes(provider)) {
-      resultText = data.choices?.[0]?.message?.content || 'No response';
-    } else if (provider === 'claude' || provider === 'anthropic') {
-      resultText = data.content?.[0]?.text || 'No response from Claude';
-    }
-
-    return c.json({
-      ok: response.ok,
-      provider,
-      model: body?.model || model || 'default',
-      result: resultText,
-      raw: data
+    // Kembalikan response asli ke klien (mendukung streaming dan berbagai tipe konten)
+    return new Response(response.body, {
+      status: response.status,
+      headers: resHeaders
     });
   } catch (err: any) {
     return c.json({ ok: false, error: 'Gateway Error: ' + err.message }, 500);
