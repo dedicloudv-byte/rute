@@ -11,3 +11,9 @@ env.VPSAI (vpsai)      R2 Bucket      local
 [wrangler:info] GET /list 200 OK (34ms)
 [wrangler:info] POST /check 200 OK (63ms)
 [wrangler:info] GET /list 200 OK (4ms)
+⎔ Reloading local server...
+⎔ Local server updated and ready
+⎔ Reloading local server...
+⎔ Local server updated and ready
+⎔ Reloading local server...
+⎔ Local server updated and ready

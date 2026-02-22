@@ -45,6 +45,10 @@ export const getFrontend = (workerUrl: string) => `
             overflow-x: hidden;
         }
 
+        @media (max-width: 640px) {
+            body { padding: 0.75rem; }
+        }
+
         .container {
             width: 100%;
             max-width: 1200px;
@@ -62,6 +66,10 @@ export const getFrontend = (workerUrl: string) => `
             .sidebar { order: 2; }
         }
 
+        @media (max-width: 640px) {
+            .container { gap: 1rem; }
+        }
+
         .glass {
             background: var(--card-bg);
             backdrop-filter: blur(24px);
@@ -69,6 +77,10 @@ export const getFrontend = (workerUrl: string) => `
             border: 1px solid var(--border);
             border-radius: 24px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 640px) {
+            .glass { border-radius: 20px; }
         }
 
         .header { margin-bottom: 3rem; }
@@ -82,7 +94,16 @@ export const getFrontend = (workerUrl: string) => `
         }
         .header p { color: var(--text-dim); font-size: 1.125rem; }
 
+        @media (max-width: 640px) {
+            .header { margin-bottom: 2rem; }
+            .header h1 { font-size: 2rem; }
+            .header p { font-size: 0.95rem; }
+        }
+
         .main-content { padding: 2.5rem; display: flex; flex-direction: column; gap: 2rem; }
+        @media (max-width: 640px) {
+            .main-content { padding: 1.5rem; gap: 1.5rem; }
+        }
 
         .section-title {
             font-size: 0.875rem;
@@ -94,6 +115,10 @@ export const getFrontend = (workerUrl: string) => `
             display: flex;
             align-items: center;
             gap: 0.75rem;
+        }
+
+        @media (max-width: 640px) {
+            .section-title { margin-bottom: 1rem; }
         }
 
         .input-group { margin-bottom: 1.5rem; }
@@ -108,6 +133,12 @@ export const getFrontend = (workerUrl: string) => `
             color: var(--text);
             font-size: 1rem;
             transition: all 0.3s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        @media (max-width: 640px) {
+            input, select, textarea { padding: 0.875rem 1rem; font-size: 16px; } /* Prevent iOS zoom */
         }
 
         input:focus, select:focus, textarea:focus {
@@ -147,6 +178,10 @@ export const getFrontend = (workerUrl: string) => `
             margin-bottom: 1.5rem;
         }
 
+        @media (max-width: 640px) {
+            .access-card { padding: 1.25rem; margin-bottom: 1rem; border-radius: 16px; }
+        }
+
         .url-box {
             display: flex;
             gap: 1rem;
@@ -156,6 +191,11 @@ export const getFrontend = (workerUrl: string) => `
             border-radius: 12px;
             margin-top: 1rem;
             border: 1px solid var(--border);
+        }
+
+        @media (max-width: 640px) {
+            .url-box { flex-direction: column; align-items: stretch; gap: 0.75rem; padding: 1rem; }
+            .url-text { font-size: 0.8rem; word-break: break-all; white-space: normal; }
         }
 
         .url-text {
@@ -186,7 +226,14 @@ export const getFrontend = (workerUrl: string) => `
             border: 1px solid rgba(99, 102, 241, 0.2);
         }
 
+        @media (max-width: 640px) {
+            .tester-section { margin-top: 2rem; padding: 1.5rem; border-radius: 20px; }
+        }
+
         .sidebar { padding: 2rem; display: flex; flex-direction: column; gap: 2.5rem; }
+        @media (max-width: 640px) {
+            .sidebar { padding: 1.5rem; gap: 1.5rem; }
+        }
         .provider-item {
             padding: 1rem 1.25rem;
             background: rgba(255, 255, 255, 0.03);
