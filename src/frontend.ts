@@ -59,12 +59,9 @@ export const getFrontend = (workerUrl: string) => `
                 grid-template-columns: 1fr;
                 max-width: 800px;
             }
-            .sidebar {
-                order: 2;
-            }
+            .sidebar { order: 2; }
         }
 
-        /* Glassmorphism Classes */
         .glass {
             background: var(--card-bg);
             backdrop-filter: blur(24px);
@@ -74,34 +71,18 @@ export const getFrontend = (workerUrl: string) => `
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* Header & Titles */
-        .header {
-            margin-bottom: 3rem;
-        }
-
+        .header { margin-bottom: 3rem; }
         .header h1 {
             font-size: 3rem;
             font-weight: 800;
-            letter-spacing: -0.05em;
             background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 0.5rem;
         }
+        .header p { color: var(--text-dim); font-size: 1.125rem; }
 
-        .header p {
-            color: var(--text-dim);
-            font-size: 1.125rem;
-            font-weight: 400;
-        }
-
-        /* Main Section */
-        .main-content {
-            padding: 2.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
+        .main-content { padding: 2.5rem; display: flex; flex-direction: column; gap: 2rem; }
 
         .section-title {
             font-size: 0.875rem;
@@ -115,32 +96,8 @@ export const getFrontend = (workerUrl: string) => `
             gap: 0.75rem;
         }
 
-        .section-title::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(to right, var(--border), transparent);
-        }
-
-        /* Forms */
-        .input-group {
-            margin-bottom: 1.5rem;
-            position: relative;
-        }
-
-        .input-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-dim);
-            margin-bottom: 0.75rem;
-        }
-
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
+        .input-group { margin-bottom: 1.5rem; }
+        .input-label { display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-dim); margin-bottom: 0.75rem; }
 
         input, select, textarea {
             width: 100%;
@@ -150,14 +107,12 @@ export const getFrontend = (workerUrl: string) => `
             border-radius: 16px;
             color: var(--text);
             font-size: 1rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-family: var(--font-main);
+            transition: all 0.3s;
         }
 
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--primary);
-            background: rgba(0, 0, 0, 0.5);
             box-shadow: 0 0 0 4px var(--primary-glow);
         }
 
@@ -171,183 +126,18 @@ export const getFrontend = (workerUrl: string) => `
             font-weight: 700;
             font-size: 1rem;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.75rem;
-            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
         }
 
-        .main-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4);
-            filter: brightness(1.1);
-        }
+        .main-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .main-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        .main-btn:active {
-            transform: translateY(0);
-        }
-
-        .main-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Instant Gateway Panel */
-        .gateway-panel {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            padding: 2rem;
-            border-radius: 24px;
-            margin-bottom: 2rem;
-            display: none;
-            animation: slideDown 0.5s ease-out;
-        }
-
-        .gateway-panel.active {
-            display: block;
-        }
-
-        .gateway-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .close-btn {
-            padding: 0.5rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            cursor: pointer;
-            color: var(--text-dim);
-            transition: all 0.2s;
-        }
-
-        .close-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text);
-        }
-
-        /* Side Panel / Sidebar */
-        .sidebar {
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 2.5rem;
-        }
-
-        .sidebar h2 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .provider-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.75rem;
-        }
-
-        .provider-item {
-            padding: 1rem 1.25rem;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-weight: 500;
-        }
-
-        .provider-item:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: var(--primary);
-            transform: translateX(4px);
-        }
-
-        .provider-item.active {
-            background: rgba(99, 102, 241, 0.1);
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        /* Stored List */
-        .vault-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            max-height: 500px;
-            overflow-y: auto;
-            padding-right: 0.5rem;
-        }
-
-        .vault-card {
-            padding: 1.25rem;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .vault-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--primary);
-        }
-
-        .vault-card.active {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.05);
-        }
-
-        .vault-info h4 {
-            font-size: 0.9375rem;
-            margin-bottom: 0.25rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .vault-meta {
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .delete-btn {
-            position: absolute;
-            top: 1.25rem;
-            right: 1.25rem;
-            color: var(--error);
-            opacity: 0;
-            transition: 0.2s;
-            cursor: pointer;
-        }
-
-        .vault-card:hover .delete-btn {
-            opacity: 1;
-        }
-
-        /* Result Area */
-        .result-area {
-            display: none;
-            margin-top: 2rem;
-            animation: fadeInUp 0.5s ease-out;
-        }
-
-        .result-area.active {
-            display: block;
-        }
+        .result-area { display: none; margin-top: 2rem; animation: fadeInUp 0.5s ease-out; }
+        .result-area.active { display: block; }
 
         .access-card {
             background: rgba(0, 0, 0, 0.4);
@@ -386,43 +176,42 @@ export const getFrontend = (workerUrl: string) => `
             font-size: 0.75rem;
             font-weight: 700;
             cursor: pointer;
-            transition: 0.2s;
         }
 
-        .copy-btn:hover {
-            filter: brightness(1.2);
+        .tester-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 24px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
         }
 
-        /* Utils */
-        .badge {
-            font-size: 0.625rem;
-            font-weight: 800;
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            text-transform: uppercase;
-            background: var(--primary);
-            color: white;
+        .sidebar { padding: 2rem; display: flex; flex-direction: column; gap: 2.5rem; }
+        .provider-item {
+            padding: 1rem 1.25rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            transition: 0.3s;
         }
+        .provider-item:hover { background: rgba(255, 255, 255, 0.06); }
+        .provider-item.active { border-color: var(--primary); color: var(--primary); }
 
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .vault-card {
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            cursor: pointer;
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+        .delete-btn { position: absolute; top: 1rem; right: 1rem; color: var(--error); font-size: 0.75rem; }
+
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
-
-        .loader {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-        }
+        .loader { width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -431,342 +220,185 @@ export const getFrontend = (workerUrl: string) => `
         <main class="main-content glass">
             <div class="header">
                 <h1>Smart Proxy Elite</h1>
-                <p>Private infrastructure for advanced AI orchestration.</p>
-            </div>
-
-            <div id="instantPanel" class="gateway-panel">
-                <div class="gateway-header">
-                    <h2 id="gatewayTitle" style="margin:0; font-size: 1.5rem;">Instant AI Gateway</h2>
-                    <button class="close-btn" onclick="resetUI()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <div class="input-group">
-                    <label class="input-label">Direct Endpoint (GET Ready)</label>
-                    <div class="url-box" style="margin-top:0; background: #000;">
-                        <div id="directUrlDisplay" class="url-text">Select a provider...</div>
-                        <button class="copy-btn" onclick="copyDirectUrl()">Copy</button>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label class="input-label">Quick Prompt</label>
-                    <textarea id="promptInput" rows="4" placeholder="Type your message here..."></textarea>
-                </div>
-
-                <button id="executeBtn" class="main-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                    <span>Execute Instant Request</span>
-                </button>
-
-                <div id="instantResult" class="result-area" style="background: rgba(0,0,0,0.4); padding: 1.5rem; border-radius: 20px; border: 1px solid var(--border); margin-top: 1.5rem;">
-                    <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-dim); margin-bottom: 1rem; text-transform: uppercase;">Gateway Output:</div>
-                    <pre id="instantOutput" style="color: var(--success); font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; white-space: pre-wrap;"></pre>
-                </div>
+                <p>Advanced Private AI Orchestration</p>
             </div>
 
             <div id="vaultForm">
-                <div class="section-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    Create Private Vault
-                </div>
-
+                <div class="section-title">Create Private Vault</div>
                 <div class="input-group">
-                    <label class="input-label">Global API Key (Auto-injected)</label>
-                    <input type="password" id="globalApiKey" placeholder="Masukkan API Key Anda di sini (sk-... atau key-...)">
-                    <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 0.4rem;">Key ini akan disuntikkan secara otomatis ke setiap permintaan melalui proxy.</div>
+                    <label class="input-label">Target API URL</label>
+                    <input type="text" id="targetUrl" value="https://example.com">
                 </div>
-
                 <div class="input-group">
-                    <label class="input-label">Target Endpoint URL</label>
-                    <input type="text" id="targetUrl" placeholder="https://api.openai.com/v1" value="https://example.com">
-                    <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 0.4rem;">Domain asli yang ingin Anda samarkan (misal: API OpenAI atau Gemini).</div>
+                    <label class="input-label">Provider API Key</label>
+                    <input type="password" id="providerApiKey" placeholder="sk-...">
                 </div>
-
                 <div class="input-group">
-                    <label class="input-label">Security Protocol</label>
+                    <label class="input-label">Security Mode</label>
                     <select id="proxyMode">
-                        <option value="elite">Elite Stealth (Stripped Headers - Paling Aman)</option>
-                        <option value="anonymous">Anonymous (Hidden Client IP)</option>
-                        <option value="transparent">Transparent (Full Passthrough)</option>
+                        <option value="elite">Elite Stealth</option>
+                        <option value="anonymous">Anonymous</option>
+                        <option value="transparent">Transparent</option>
                     </select>
                 </div>
-
-                <button id="saveBtn" class="main-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
-                    <span>Deploy Persistent Secure Proxy</span>
-                </button>
+                <button id="saveBtn" class="main-btn">Initialize Vault</button>
             </div>
 
             <div id="vaultResult" class="result-area">
-                <div class="section-title">Deployment Complete</div>
+                <div class="section-title">Deployment Success</div>
+
+                <div class="access-card" style="border-color: var(--success); background: rgba(16, 185, 129, 0.05);">
+                    <div style="font-weight: 700; color: var(--success); margin-bottom: 0.5rem;">PROXY API KEY</div>
+                    <div class="url-box">
+                        <div id="newProxyKey" class="url-text" style="color: white;">-</div>
+                        <button class="copy-btn" onclick="copyText(document.getElementById('newProxyKey').innerText, this)">Copy</button>
+                    </div>
+                </div>
+
                 <div id="deploymentCards"></div>
 
-                <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(99, 102, 241, 0.05); border-radius: 20px; border: 1px dashed var(--primary);">
-                    <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--primary);">Integration Guide</h3>
-                    <p id="integrationGuide" style="font-size: 0.875rem; color: var(--text-dim);"></p>
+                <div class="tester-section">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Interactive Tester</h3>
+                    <div class="input-group">
+                        <label class="input-label">Endpoint</label>
+                        <input type="text" id="testEndpoint" readonly>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Proxy Key</label>
+                        <input type="text" id="testProxyKey">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Prompt</label>
+                        <textarea id="testPrompt" rows="3" placeholder="Test message..."></textarea>
+                    </div>
+                    <button id="runTestBtn" class="main-btn">Execute Test</button>
+
+                    <div id="testOutput" style="display:none; margin-top: 1.5rem; background: #000; padding: 1rem; border-radius: 12px; border: 1px solid var(--border);">
+                        <pre id="testResultText" style="color: var(--success); font-family: monospace; font-size: 0.8rem; white-space: pre-wrap;"></pre>
+                    </div>
                 </div>
             </div>
         </main>
 
         <aside class="sidebar glass">
-            <div class="side-section">
-                <h2>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    AI Gateways
-                </h2>
-                <div class="provider-grid">
-                    <div class="provider-item" onclick="selectProvider('gemini')">
-                        <span>✨ Gemini 2.0 Flash</span>
-                        <span class="badge">LATEST</span>
-                    </div>
-                    <div class="provider-item" onclick="selectProvider('openai')">
-                        <span>🤖 GPT-4o</span>
-                        <span class="badge">NEW</span>
-                    </div>
-                    <div class="provider-item" onclick="selectProvider('claude')">
-                        <span>🧠 Claude 3.5</span>
-                        <span class="badge">PRO</span>
-                    </div>
-                    <div class="provider-item" onclick="selectProvider('groq')">
-                        <span>⚡ Groq Llama3</span>
-                        <span class="badge">FAST</span>
-                    </div>
-                </div>
-            </div>
+            <h2>Templates</h2>
+            <div class="provider-item" onclick="selectTemplate('gemini')">✨ Gemini 2.0 Flash</div>
+            <div class="provider-item" onclick="selectTemplate('openai')">🤖 GPT-4o</div>
 
-            <div class="side-section">
-                <h2>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                    My Vaults
-                </h2>
-                <div id="vaultList" class="vault-list">
-                    <div style="text-align: center; color: var(--text-dim); padding: 2rem; font-size: 0.875rem;">Initializing...</div>
-                </div>
-            </div>
+            <h2 style="margin-top: 2rem;">My Vaults</h2>
+            <div id="vaultList"></div>
         </aside>
     </div>
 
     <script>
-        const PROVIDERS = {
-            gemini: { name: 'Gemini 2.0 Flash', url: 'https://generativelanguage.googleapis.com' },
-            openai: { name: 'GPT-4o / OpenAI', url: 'https://api.openai.com/v1' },
-            claude: { name: 'Claude 3.5 Sonnet', url: 'https://api.anthropic.com/v1' },
-            groq: { name: 'Groq Cloud', url: 'https://api.groq.com/openai/v1' }
-        };
+        let currentProvider = 'custom';
+        let currentVaultData = null;
 
-        let selectedId = null;
-        let currentProvider = null;
-
-        function escapeHTML(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
-        // UI Interactions
-        function selectProvider(id) {
+        function selectTemplate(id) {
             currentProvider = id;
-            document.querySelectorAll('.provider-item').forEach(el => {
-                el.classList.remove('active');
-                if(el.innerText.toLowerCase().includes(id)) el.classList.add('active');
-            });
-
-            document.getElementById('vaultForm').style.display = 'none';
-            document.getElementById('vaultResult').classList.remove('active');
-            document.getElementById('instantPanel').classList.add('active');
-            document.getElementById('gatewayTitle').innerText = PROVIDERS[id].name + ' Gateway';
-            document.getElementById('targetUrl').value = PROVIDERS[id].url;
-
-            updateDirectUrl();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('targetUrl').value = id === 'gemini' ? 'https://generativelanguage.googleapis.com' : 'https://api.openai.com/v1';
         }
 
-        function resetUI() {
-            currentProvider = null;
-            document.querySelectorAll('.provider-item').forEach(el => el.classList.remove('active'));
-            document.getElementById('instantPanel').classList.remove('active');
-            document.getElementById('vaultForm').style.display = 'block';
-            document.getElementById('targetUrl').value = 'https://example.com';
+        function copyText(t, b) {
+            navigator.clipboard.writeText(t);
+            b.innerText = 'Copied';
+            setTimeout(() => b.innerText = 'Copy', 2000);
         }
 
-        function updateDirectUrl() {
-            if(!currentProvider) return;
-            const baseUrl = window.location.origin + '/ai/' + currentProvider;
-            const key = document.getElementById('globalApiKey').value.trim() || 'YOUR_API_KEY';
-            const prompt = encodeURIComponent(document.getElementById('promptInput').value.trim() || 'Hello');
-            document.getElementById('directUrlDisplay').innerText = \`\${baseUrl}?prompt=\${prompt}&apikey=\${key}\`;
-        }
-
-        document.getElementById('promptInput').oninput = updateDirectUrl;
-        document.getElementById('globalApiKey').oninput = updateDirectUrl;
-
-        function copyDirectUrl() {
-            const url = document.getElementById('directUrlDisplay').innerText;
-            navigator.clipboard.writeText(url);
-            const btn = document.querySelector('.copy-btn');
-            btn.innerText = 'Copied!';
-            setTimeout(() => btn.innerText = 'Copy', 2000);
-        }
-
-        // Backend Calls
-        async function fetchVault() {
+        async function fetchVaults() {
+            const res = await fetch('/list');
+            const data = await res.json();
             const list = document.getElementById('vaultList');
-            try {
-                const res = await fetch('/list');
-                const data = await res.json();
-                list.innerHTML = '';
-
-                if (data.items.length === 0) {
-                    list.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 2rem;">Vault is empty</div>';
-                    return;
-                }
-
-                data.items.sort((a,b) => new Date(b.uploaded) - new Date(a.uploaded)).forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'vault-card' + (selectedId === item.id ? ' active' : '');
-                    card.onclick = () => showVaultDetail(item);
-
-                    const safeUrl = escapeHTML(item.url);
-                    const safeId = escapeHTML(item.id);
-                    const safeProvider = escapeHTML(item.provider);
-
-                    card.innerHTML = \`
-                        <div class="vault-info">
-                            <h4>\${safeUrl}</h4>
-                            <div class="vault-meta">ID: \${safeId.substring(0,8)}... • \${safeProvider}</div>
-                        </div>
-                        <div class="delete-btn">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                        </div>
-                    \`;
-                    card.querySelector('.delete-btn').onclick = (e) => {
-                        e.stopPropagation();
-                        deleteVault(item.id);
-                    };
-                    list.appendChild(card);
-                });
-            } catch (err) {
-                list.innerHTML = '<div style="color: var(--error); text-align: center;">Sync failed</div>';
-            }
+            list.innerHTML = '';
+            data.items.forEach(item => {
+                const d = document.createElement('div');
+                d.className = 'vault-card';
+                d.innerHTML = \`
+                    <div style="font-size: 0.8rem; font-weight: 600;">\${item.url}</div>
+                    <div class="delete-btn" onclick="event.stopPropagation(); deleteVault('\${item.id}')">Delete</div>
+                \`;
+                d.onclick = () => showDetails(item.id, item.url, item.provider);
+                list.appendChild(d);
+            });
         }
 
         async function deleteVault(id) {
-            if(!confirm('Destroy this secure vault?')) return;
-            await fetch('/delete/' + id, { method: 'DELETE' });
-            if(selectedId === id) resetUI();
-            fetchVault();
-        }
-
-        function showVaultDetail(item) {
-            selectedId = item.id;
-            document.querySelectorAll('.vault-card').forEach(el => el.classList.remove('active'));
-            resetUI();
-
-            document.getElementById('vaultResult').classList.add('active');
-            const container = document.getElementById('deploymentCards');
-            container.innerHTML = '';
-
-            const modes = [
-                { id: 'elite', label: 'Elite Stealth Protocol' },
-                { id: 'anonymous', label: 'Anonymous Routing' },
-                { id: 'transparent', label: 'Transparent Proxy' }
-            ];
-
-            modes.forEach(m => {
-                const url = window.location.origin + '/p/' + m.id + '/' + item.id;
-                const safeUrl = escapeHTML(url);
-                const safeLabel = escapeHTML(m.label);
-
-                const card = document.createElement('div');
-                card.className = 'access-card';
-                card.innerHTML = \`
-                    <div style="font-size: 0.875rem; font-weight: 700;">\${safeLabel}</div>
-                    <div class="url-box">
-                        <div class="url-text">\${safeUrl}</div>
-                        <button class="copy-btn">Copy</button>
-                    </div>
-                \`;
-                card.querySelector('.copy-btn').onclick = (e) => {
-                    e.stopPropagation();
-                    copyText(url, e.target);
-                };
-                container.appendChild(card);
-            });
-
-            const guide = document.getElementById('integrationGuide');
-            const safeEndpoint = window.location.origin + '/p/elite/' + item.id;
-            if (item.provider === 'gemini') {
-                guide.textContent = 'Configured for Google GenAI SDK. Set client_options={"api_endpoint": "' + safeEndpoint + '"}.';
-            } else if (item.provider === 'openai') {
-                guide.textContent = 'OpenAI SDK ready. Use base_url="' + safeEndpoint + '".';
-            } else {
-                guide.textContent = 'Use these endpoints in any HTTP client. Headers and keys are automatically injected.';
+            if(confirm('Delete?')) {
+                await fetch('/delete/' + id, { method: 'DELETE' });
+                fetchVaults();
             }
         }
 
-        function copyText(text, btn) {
-            navigator.clipboard.writeText(text);
-            const original = btn.innerText;
-            btn.innerText = 'Done!';
-            setTimeout(() => btn.innerText = original, 2000);
+        function showDetails(id, url, provider, vaultKey = '') {
+            document.getElementById('vaultResult').classList.add('active');
+            document.getElementById('vaultForm').style.display = 'none';
+            if (vaultKey) {
+                document.getElementById('newProxyKey').innerText = vaultKey;
+                document.getElementById('testProxyKey').value = vaultKey;
+            }
+            const cards = document.getElementById('deploymentCards');
+            cards.innerHTML = '';
+            ['elite', 'anonymous'].forEach(mode => {
+                const pUrl = window.location.origin + '/p/' + mode + '/' + id;
+                const c = document.createElement('div');
+                c.className = 'access-card';
+                c.innerHTML = \`<div style="font-size: 0.7rem;">\${mode.toUpperCase()}</div><div class="url-box"><div class="url-text">\${pUrl}</div><button class="copy-btn" onclick="copyText('\${pUrl}', this)">Copy</button></div>\`;
+                cards.appendChild(c);
+            });
+            document.getElementById('testEndpoint').value = window.location.origin + '/p/elite/' + id;
+            currentVaultData = { id, provider };
         }
 
         document.getElementById('saveBtn').onclick = async () => {
-            const btn = document.getElementById('saveBtn');
-            const url = document.getElementById('targetUrl').value.trim();
-            const key = document.getElementById('globalApiKey').value.trim();
+            const url = document.getElementById('targetUrl').value;
+            const key = document.getElementById('providerApiKey').value;
+            const res = await fetch('/check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url, key, provider: currentProvider })
+            });
+            const data = await res.json();
+            if(data.ok) {
+                showDetails(data.id, url, currentProvider, data.vaultKey);
+                fetchVaults();
+            }
+        };
 
+        document.getElementById('runTestBtn').onclick = async () => {
+            const btn = document.getElementById('runTestBtn');
+            const output = document.getElementById('testOutput');
+            const outText = document.getElementById('testResultText');
             btn.disabled = true;
-            btn.innerHTML = '<div class="loader"></div><span>Securing...</span>';
+            output.style.display = 'block';
+            outText.innerText = 'Connecting...';
 
             try {
-                const res = await fetch('/check', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url, key, provider: currentProvider || 'custom' })
-                });
-                const data = await res.json();
-                if (data.ok) {
-                    await fetchVault();
-                    showVaultDetail({ id: data.id, url, provider: currentProvider || 'custom' });
+                let testUrl = document.getElementById('testEndpoint').value;
+                let body = null;
+                if (currentVaultData.provider === 'gemini') {
+                    testUrl += '/v1beta/models/gemini-2.0-flash-exp:generateContent';
+                    body = JSON.stringify({ contents: [{ parts: [{ text: document.getElementById('testPrompt').value || 'Hi' }] }] });
                 } else {
-                    alert('Deployment Failed: ' + data.error);
+                    testUrl += '/chat/completions';
+                    body = JSON.stringify({ model: 'gpt-4o', messages: [{ role: 'user', content: document.getElementById('testPrompt').value || 'Hi' }] });
                 }
-            } catch (err) {
-                alert('Connection Error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><span>Deploy Persistent Secure Proxy</span>';
-            }
-        };
 
-        document.getElementById('executeBtn').onclick = async () => {
-            const btn = document.getElementById('executeBtn');
-            const key = document.getElementById('globalApiKey').value.trim();
-            const prompt = document.getElementById('promptInput').value.trim();
-
-            if(!key || !prompt) return alert('API Key and Prompt are required for instant routing.');
-
-            btn.disabled = true;
-            document.getElementById('instantResult').classList.add('active');
-            document.getElementById('instantOutput').innerText = 'Initializing stream...';
-
-            try {
-                const url = \`/ai/\${currentProvider}?prompt=\${encodeURIComponent(prompt)}&apikey=\${key}\`;
-                const res = await fetch(url);
-                const data = await res.json();
-                document.getElementById('instantOutput').innerText = data.result || JSON.stringify(data.raw, null, 2);
-            } catch (err) {
-                document.getElementById('instantOutput').innerText = 'Gateway Timeout';
+                const res = await fetch(testUrl, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + document.getElementById('testProxyKey').value, 'Content-Type': 'application/json' },
+                    body: body
+                });
+                const data = await res.text();
+                outText.innerText = data;
+            } catch (e) {
+                outText.innerText = 'Error: ' + e.message;
             } finally {
                 btn.disabled = false;
             }
         };
 
-        fetchVault();
+        fetchVaults();
     </script>
 </body>
 </html>
-\`;
+`;

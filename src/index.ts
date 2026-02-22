@@ -55,7 +55,15 @@ app.post('/check', async (c) => {
 
     // Kita anggap "OK" jika server merespons, meskipun statusnya bukan 200 (misal 401 pada root API)
     const id = crypto.randomUUID();
-    const config = { url: targetUrl, key: apiKey, provider: provider };
+    // Generate Proxy Key baru (Vault Key)
+    const vaultKey = 'vpx_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+    const config = {
+      url: targetUrl,
+      key: apiKey,
+      provider: provider,
+      vaultKey: vaultKey
+    };
 
     await c.env.VPSAI.put(id, JSON.stringify(config), {
       customMetadata: {
@@ -68,7 +76,8 @@ app.post('/check', async (c) => {
       ok: true,
       status: response.status,
       warning: response.ok ? null : `Target merespons dengan status ${response.status}`,
-      id
+      id,
+      vaultKey
     });
   } catch (err: any) {
     return c.json({ ok: false, error: 'Gagal terhubung ke target: ' + (err.message || 'Unknown error') }, 500);
@@ -76,8 +85,9 @@ app.post('/check', async (c) => {
 });
 
 // Route internal untuk aset dan link (menggunakan Base64 untuk efisiensi)
-app.all('/r/:mode/:encodedUrl/:path{.+}?', async (c) => {
-  const { mode, encodedUrl, path } = c.req.param();
+app.all('/r/:mode/:encodedUrl/*', async (c) => {
+  const { mode, encodedUrl } = c.req.param();
+  const path = c.req.param('*');
   let targetBaseUrl: string;
   try {
     // Kembalikan ke format Base64 standar dari format URL-safe
@@ -133,7 +143,7 @@ app.get('/ai/:provider', async (c) => {
       url = 'https://api.openai.com/v1/chat/completions';
       headers['Authorization'] = `Bearer ${apikey}`;
       body = {
-        model: model || 'gpt-3.5-turbo',
+        model: model || 'gpt-4o',
         messages: [{ role: 'user', content: prompt }]
       };
     } else if (provider === 'claude' || provider === 'anthropic') {
@@ -141,7 +151,7 @@ app.get('/ai/:provider', async (c) => {
       headers['x-api-key'] = apikey;
       headers['anthropic-version'] = '2023-06-01';
       body = {
-        model: model || 'claude-3-haiku-20240307',
+        model: model || 'claude-3-5-sonnet-20240620',
         max_tokens: 1024,
         messages: [{ role: 'user', content: prompt }]
       };
@@ -197,8 +207,9 @@ app.get('/ai/:provider', async (c) => {
 });
 
 // Route utama untuk proxy dengan dukungan ID dari R2
-app.all('/p/:mode/:id/:path{.+}?', async (c) => {
-  const { mode, id, path } = c.req.param();
+app.all('/p/:mode/:id/*', async (c) => {
+  const { mode, id } = c.req.param();
+  const path = c.req.param('*');
   const obj = await c.env.VPSAI.get(id);
   if (!obj) return c.text('Endpoint tidak ditemukan atau telah kedaluwarsa', 404);
 
@@ -212,6 +223,22 @@ app.all('/p/:mode/:id/:path{.+}?', async (c) => {
   } catch {
     // Fallback untuk data lama yang hanya menyimpan string URL
     targetBaseUrl = rawData;
+  }
+
+  // Validasi Vault Key (Proxy Key)
+  if (config.vaultKey) {
+    const authHeader = c.req.header('Authorization') || '';
+    const vaultKeyHeader = c.req.header('X-Vault-Key');
+    const vaultKeyQuery = c.req.query('vault_key');
+
+    const providedKey = authHeader.replace(/Bearer\s+/i, '') || vaultKeyHeader || vaultKeyQuery;
+
+    if (providedKey !== config.vaultKey) {
+      return c.json({
+        ok: false,
+        error: 'Unauthorized: Invalid or missing Proxy Key (Vault Key)'
+      }, 401);
+    }
   }
 
   return handleProxy(c, mode, targetBaseUrl, path, config);
